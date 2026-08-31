@@ -91,9 +91,12 @@ function loadState() {
   if (!Array.isArray(state.sales)) state.sales = [];
 }
 
-// Save data to LocalStorage
+// Save data to LocalStorage + Cloud Sync
 function saveState() {
   localStorage.setItem("amazon_fba_tracker_state", JSON.stringify(state));
+  if (window.UniversalCloudSync) {
+    window.UniversalCloudSync.saveState("fba_tracker", state);
+  }
 }
 
 // Reset data to empty

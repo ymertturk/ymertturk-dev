@@ -72,6 +72,9 @@ class MindNexusApp {
     saveData() {
         localStorage.setItem('mindnexus_nodes', JSON.stringify(this.nodes));
         localStorage.setItem('mindnexus_links', JSON.stringify(this.links));
+        if (window.UniversalCloudSync) {
+            window.UniversalCloudSync.saveState("mindnexus", { nodes: this.nodes, links: this.links });
+        }
         this.updateCounts();
         this.renderMobileNotesFeed();
     }
