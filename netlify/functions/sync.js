@@ -1,9 +1,7 @@
-// Netlify Serverless Cloud Persistence Engine for ymertturk.dev
-// Handles 24/7 live cross-device sync for FBA Tracker & MindNexus
-
+// Netlify Serverless Cloud Persistence Engine for ymertturk.dev (ES Module)
 let inMemoryStore = {};
 
-exports.handler = async (event, context) => {
+export async function handler(event, context) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -50,4 +48,4 @@ exports.handler = async (event, context) => {
   }
 
   return { statusCode: 405, headers, body: 'Method Not Allowed' };
-};
+}
