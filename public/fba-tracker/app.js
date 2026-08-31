@@ -44,6 +44,16 @@ function initApp() {
 
   loadState();
   
+  // Initialize 24/7 Universal Cloud Auto-Sync
+  if (window.UniversalCloudSync) {
+    window.UniversalCloudSync.init('fba_tracker', (cloudData) => {
+      if (cloudData && Array.isArray(cloudData.shipments)) {
+        state = cloudData;
+        renderApp();
+      }
+    });
+  }
+
   // Set current date on header
   const todayOptions = { year: 'numeric', month: 'long', day: 'numeric' };
   document.getElementById("current-date-badge").textContent = new Date().toLocaleDateString('tr-TR', todayOptions);
@@ -83,7 +93,7 @@ function loadState() {
   } else {
     if (window.INITIAL_MOCK_DATA) {
       state = JSON.parse(JSON.stringify(window.INITIAL_MOCK_DATA));
-      saveState();
+      // Removed saveState() call here to prevent overwriting live cloud data on fresh browser load!
     }
   }
   // Double check state properties are arrays

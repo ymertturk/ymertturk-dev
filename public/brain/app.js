@@ -29,6 +29,18 @@ class MindNexusApp {
         this.initKeyboardShortcuts();
         this.updateCounts();
         this.renderMobileNotesFeed();
+
+        if (window.UniversalCloudSync) {
+            window.UniversalCloudSync.init('mindnexus', (cloudData) => {
+                if (cloudData && Array.isArray(cloudData.nodes)) {
+                    this.nodes = cloudData.nodes;
+                    this.links = cloudData.links || [];
+                    this.graph.setData(this.nodes, this.links);
+                    this.updateCounts();
+                    this.renderMobileNotesFeed();
+                }
+            });
+        }
     }
 
     // 1. Data Management
