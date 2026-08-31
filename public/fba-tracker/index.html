@@ -20,6 +20,20 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Secret PIN Security Gate -->
+  <div id="pin-gate-overlay" class="pin-gate-overlay" style="display:none;">
+      <div class="pin-card">
+          <div class="pin-icon">🔐</div>
+          <h2>FBA Tracker Portal</h2>
+          <p>Gizli Amazon FBA Stok & Satış Paneli. Lütfen PIN kodunuzu girin:</p>
+          <div class="pin-input-group">
+              <input type="password" id="pin-input" maxlength="6" placeholder="****" autofocus>
+              <button id="unlock-pin-btn" class="btn btn-primary" style="padding:10px 18px;">Giriş</button>
+          </div>
+          <small id="pin-error-text" class="pin-error" style="display:none;">⚠️ Yanlış PIN!</small>
+      </div>
+  </div>
+
   <div class="app-container">
     <!-- Sidebar Navigation -->
     <aside class="sidebar">

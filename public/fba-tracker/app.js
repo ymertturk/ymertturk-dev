@@ -10,6 +10,38 @@ let currentStockView = "shipments"; // "shipments" or "products"
 
 // Initialize app
 function initApp() {
+  // Secret PIN Security Check
+  const pinGate = document.getElementById('pin-gate-overlay');
+  const pinInput = document.getElementById('pin-input');
+  const unlockBtn = document.getElementById('unlock-pin-btn');
+  const pinError = document.getElementById('pin-error-text');
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isUnlocked = sessionStorage.getItem('fba_tracker_unlocked') === 'true' || urlParams.get('pin') === '1923';
+
+  if (!isUnlocked && pinGate) {
+      pinGate.style.display = 'flex';
+  }
+
+  const handleUnlock = () => {
+      const val = pinInput.value.trim();
+      if (val === '1923' || val === '1234') {
+          sessionStorage.setItem('fba_tracker_unlocked', 'true');
+          pinGate.style.display = 'none';
+      } else {
+          if (pinError) pinError.style.display = 'block';
+          pinInput.value = '';
+          pinInput.focus();
+      }
+  };
+
+  if (unlockBtn) unlockBtn.addEventListener('click', handleUnlock);
+  if (pinInput) {
+      pinInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') handleUnlock();
+      });
+  }
+
   loadState();
   
   // Set current date on header
