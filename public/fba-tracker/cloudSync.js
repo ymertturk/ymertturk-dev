@@ -1,54 +1,69 @@
 /**
- * Universal Cloud Storage & Sync Engine for ymertturk.dev apps
- * Handles 24/7 cross-device data persistence between mobile, desktop & cloud.
+ * Universal Live Cloud Storage & Auto-Sync Engine for ymertturk.dev
+ * Real-time 24/7 cross-device state synchronization across all browsers and mobile devices.
  */
 
 window.UniversalCloudSync = {
-    // Save state to LocalStorage + Cloud Store API
-    async saveState(appId, stateData) {
-        const localStorageKey = `ymertturk_app_data_${appId}`;
-        try {
-            localStorage.setItem(localStorageKey, JSON.stringify(stateData));
-            
-            // Try saving to backend API if active server running
-            fetch('/api/sync-state', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ appId, data: stateData, timestamp: new Date().toISOString() })
-            }).catch(e => {
-                // Background sync silently
-            });
-        } catch (e) {
-            console.warn(`[CloudSync] Local save failed for ${appId}`, e);
-        }
+    appId: 'fba_tracker',
+    lastSyncTime: null,
+
+    init(appId, onCloudDataReceived) {
+        this.appId = appId;
+        this.onCloudDataReceived = onCloudDataReceived;
+
+        // 1. Initial live fetch on load
+        this.fetchCloudState();
+
+        // 2. Poll cloud server every 10 seconds for live updates from other devices
+        setInterval(() => {
+            this.fetchCloudState(true);
+        }, 10000);
     },
 
-    // Load state from Cloud Store / LocalStorage
-    async loadState(appId, fallbackData) {
-        const localStorageKey = `ymertturk_app_data_${appId}`;
-        
-        // 1. Check local storage first
-        let localData = null;
-        const saved = localStorage.getItem(localStorageKey);
-        if (saved) {
-            try { localData = JSON.parse(saved); } catch(e) {}
-        }
-
-        // 2. Fetch remote cloud state if available
+    async fetchCloudState(isSilent = false) {
         try {
-            const res = await fetch(`/api/sync-state?appId=${appId}`);
+            const res = await fetch(`/.netlify/functions/sync?appId=${this.appId}`);
             if (res.ok) {
-                const cloudPayload = await res.json();
-                if (cloudPayload && cloudPayload.data) {
-                    // Update local storage with fresh cloud state
-                    localStorage.setItem(localStorageKey, JSON.stringify(cloudPayload.data));
-                    return cloudPayload.data;
+                const payload = await res.json();
+                if (payload && payload.data && payload.updatedAt !== this.lastSyncTime) {
+                    this.lastSyncTime = payload.updatedAt;
+                    
+                    // Update LocalStorage
+                    const localStorageKey = `ymertturk_app_data_${this.appId}`;
+                    localStorage.setItem(localStorageKey, JSON.stringify(payload.data));
+
+                    if (this.onCloudDataReceived) {
+                        this.onCloudDataReceived(payload.data, isSilent);
+                    }
                 }
             }
         } catch (e) {
-            // Offline mode or static host fallback
+            // Silence network errors
         }
+    },
 
-        return localData || fallbackData;
+    async saveState(appId, stateData) {
+        this.appId = appId || this.appId;
+        const localStorageKey = `ymertturk_app_data_${this.appId}`;
+
+        // 1. Save local
+        try {
+            localStorage.setItem(localStorageKey, JSON.stringify(stateData));
+        } catch(e) {}
+
+        // 2. Push to live serverless Cloud Storage endpoint
+        try {
+            const res = await fetch(`/.netlify/functions/sync?appId=${this.appId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ appId: this.appId, data: stateData })
+            });
+            if (res.ok) {
+                const payload = await res.json();
+                this.lastSyncTime = payload.updatedAt;
+            }
+        } catch (e) {
+            console.warn('[CloudSync] Serverless push failed', e);
+        }
     }
 };
