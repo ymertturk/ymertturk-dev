@@ -97,7 +97,7 @@ const tr: Locale = {
         {
             icon: '⚖️',
             title: 'Tedarikçi Fiyat Karşılaştırma',
-            description: 'Yurtdışı tedarikçi tekliflerini (Aim, TrendCaravelle vb.) gümrük vergileri (GTIP), nakliye maliyetleri ve döviz kurları ile kar-zarar kıyaslayan karar destek sistemi.',
+            description: 'Yurtdışı tedarikçi tekliflerini gümrük vergileri (GTIP), nakliye maliyetleri ve döviz kurları ile kar-zarar odaklı kıyaslayan karar destek sistemi.',
             tech: ['React', 'TypeScript', 'TailwindCSS', 'Vite', 'Excel/PDF Parsing'],
         },
         {
