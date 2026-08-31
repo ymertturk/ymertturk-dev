@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MindNexus | Mobil Otonom İkinci Beyin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+
+    <!-- Secret PIN Security Gate -->
+    <div id="pin-gate-overlay" class="pin-gate-overlay" style="display:none;">
+        <div class="pin-card">
+            <div class="pin-icon">🔐</div>
+            <h2>MindNexus Portal</h2>
+            <p>Gizli İkinci Beyin Haritanız. Lütfen PIN kodunuzu girin:</p>
+            <div class="pin-input-group">
+                <input type="password" id="pin-input" maxlength="6" placeholder="****" autofocus>
+                <button id="unlock-pin-btn" class="btn primary-btn">Giriş</button>
+            </div>
+            <small id="pin-error-text" class="pin-error" style="display:none;">⚠️ Yanlış PIN!</small>
+        </div>
+    </div>
+
+    <!-- Mobile Native Top App Header -->
+    <header class="app-header">
+        <div class="brand">
+            <div class="logo-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.93 4.93l2.12 2.12m9.9 9.9l2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9l2.12-2.12"/>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <h1>MindNexus <span>v4.0 Pro</span></h1>
+            </div>
+        </div>
+
+        <!-- Desktop Search & Filters (Hidden on small mobile screens, replaced by bottom bar) -->
+        <div class="header-center desktop-only">
+            <div class="search-box-wrapper">
+                <div class="search-box">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Ara (Cmd+K)...">
+                    <button id="clear-search-btn" class="icon-btn-sm" style="display:none;">✕</button>
+                </div>
+                <div id="spotlight-results" class="spotlight-dropdown" style="display:none;"></div>
+            </div>
+
+            <!-- Source Filter Tabs -->
+            <div class="source-filters">
+                <button class="filter-tab active" data-source="all">
+                    <span>Tümü</span>
+                    <span class="count-badge" id="count-all">0</span>
+                </button>
+                <button class="filter-tab" data-source="phone">
+                    <span>📱 Telefon</span>
+                    <span class="count-badge" id="count-phone">0</span>
+                </button>
+                <button class="filter-tab" data-source="instagram">
+                    <span>📸 Insta</span>
+                    <span class="count-badge" id="count-instagram">0</span>
+                </button>
+                <button class="filter-tab" data-source="twitter">
+                    <span>🐦 X</span>
+                    <span class="count-badge" id="count-twitter">0</span>
+                </button>
+                <button class="filter-tab" data-source="physical">
+                    <span>📝 Defter</span>
+                    <span class="count-badge" id="count-physical">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="header-right">
+            <!-- View Switcher (Tuval Graph <-> Mobil Liste Akışı) -->
+            <div class="view-switch-tabs">
+                <button id="view-mode-graph" class="view-switch-btn active" title="Harita Görünümü">🧠 Harita</button>
+                <button id="view-mode-list" class="view-switch-btn" title="Mobil Liste Akışı">📋 Liste</button>
+            </div>
+
+            <button id="voice-dictate-btn" class="btn voice-btn" title="Konuşarak Fikir Ekle">
+                🎙️ <span class="desktop-only">Konuş</span>
+            </button>
+
+            <button id="add-note-modal-btn" class="btn primary-btn desktop-only">
+                + Not Ekle
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Sub-Header Search & Source Chips (Only visible on mobile) -->
+    <div class="mobile-search-bar-row mobile-only">
+        <div class="search-box mobile-search-input-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text" id="mobile-search-input" placeholder="Fikirlerde ara...">
+        </div>
+        <div class="mobile-source-chips">
+            <button class="chip-tab active" data-source="all">Tümü</button>
+            <button class="chip-tab" data-source="phone">📱 Telefon</button>
+            <button class="chip-tab" data-source="instagram">📸 Insta</button>
+            <button class="chip-tab" data-source="twitter">🐦 X</button>
+            <button class="chip-tab" data-source="physical">📝 Defter</button>
+        </div>
+    </div>
+
+    <!-- Main Workspace Container -->
+    <main class="workspace">
+        
+        <!-- Canvas Floating Toolbar (Desktop/Mobile Floating Dock) -->
+        <div class="canvas-toolbar" id="canvas-toolbar">
+            <button id="tool-zoom-in" title="Yakınlaştır">🔍+</button>
+            <button id="tool-zoom-out" title="Uzaklaştır">🔍-</button>
+            <button id="tool-fit" title="Sığdır">🎯</button>
+            <button id="tool-connect" title="Korelasyon Çiz">🔗 Bağla</button>
+            <button id="tool-auto-link" title="Yapay Zeka Korelasyon">🤖 AI Bağ</button>
+            <button id="tool-synthesize" title="Sentezle">🧠 Sentez</button>
+            <div class="toolbar-divider"></div>
+            <button id="tool-bulk" title="Toplu Not Yükle">📦 Toplu</button>
+            <button id="tool-ocr" title="Defter OCR">📸 OCR</button>
+        </div>
+
+        <!-- View Mode 1: Interactive Neural Canvas -->
+        <div id="view-container-graph" class="canvas-wrapper">
+            <canvas id="graph-canvas"></canvas>
+
+            <!-- Voice Active Bar -->
+            <div id="voice-active-bar" class="voice-active-bar" style="display:none;">
+                <div class="pulse-mic">🎙️</div>
+                <div class="voice-status-text">
+                    <strong>Dinleniyor...</strong>
+                    <p id="voice-transcript-text">Konuşun...</p>
+                </div>
+                <button id="stop-voice-btn" class="btn btn-sm secondary-btn">Bitti</button>
+            </div>
+            
+            <!-- Canvas Legend -->
+            <div class="canvas-legend">
+                <div class="legend-item"><span class="dot active-glow"></span> Aktif</div>
+                <div class="legend-item"><span class="dot agent-task-glow"></span> 🤖 Otonom Ajan</div>
+                <div class="legend-item"><span class="dot expired-dust"></span> ⏳ Arşiv</div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state" style="display:none;">
+                <div class="empty-icon">🧠</div>
+                <h3>Eşleşen Fikir Bulunamadı</h3>
+                <p>Arama kriterlerinizi değiştirin veya yeni bir fikir ekleyin.</p>
+            </div>
+        </div>
+
+        <!-- View Mode 2: Ultra Mobile Native Card List View -->
+        <div id="view-container-list" class="mobile-list-wrapper" style="display:none;">
+            <div id="mobile-notes-feed" class="notes-feed-grid"></div>
+        </div>
+
+        <!-- Native Mobile Bottom Navigation Bar (iOS/Android App Dock) -->
+        <nav class="mobile-bottom-nav mobile-only">
+            <button class="nav-item active" id="nav-btn-graph">
+                <span class="nav-icon">🧠</span>
+                <span class="nav-label">Harita</span>
+            </button>
+            <button class="nav-item" id="nav-btn-list">
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">Notlar</span>
+            </button>
+            <button class="nav-fab-btn" id="nav-btn-add" title="Hızlı Fikir Ekle">
+                <span>+</span>
+            </button>
+            <button class="nav-item" id="nav-btn-voice">
+                <span class="nav-icon">🎙️</span>
+                <span class="nav-label">Ses</span>
+            </button>
+            <button class="nav-item" id="nav-btn-bulk">
+                <span class="nav-icon">📦</span>
+                <span class="nav-label">Toplu</span>
+            </button>
+        </nav>
+
+        <!-- Right Side / Mobile Bottom Sheet Detail Drawer -->
+        <aside id="detail-drawer" class="detail-drawer">
+            <div class="drawer-header">
+                <div class="mobile-drag-pill"></div>
+                <div class="drawer-source-badge" id="drawer-source-badge">
+                    <span id="drawer-source-icon">📱</span>
+                    <span id="drawer-source-name">Telefon Notu</span>
+                </div>
+                <button id="close-drawer-btn" class="icon-btn">✕</button>
+            </div>
+
+            <div class="drawer-body">
+                <div class="drawer-status-bar">
+                    <span class="status-pill" id="drawer-status-pill">⚡ Aktif</span>
+                    <span class="date-text" id="drawer-date">2026-08-31</span>
+                </div>
+
+                <h2 id="drawer-title" class="drawer-title">Fikir Başlığı</h2>
+
+                <!-- Autonomous Agent Banner -->
+                <div id="agent-task-banner" class="agent-task-banner" style="display:none;">
+                    <div class="agent-banner-header">
+                        <span class="agent-icon">🤖</span>
+                        <strong>Otonom Kod Ajanı</strong>
+                    </div>
+                    <p id="agent-task-status-text">Arka planda güncelleme yapılıyor...</p>
+                    <button id="trigger-agent-task-btn" class="btn btn-sm primary-btn mt-2">⚡ Güncellemeyi Başlat</button>
+                </div>
+
+                <div id="drawer-image-wrapper" class="drawer-image-wrapper" style="display:none;">
+                    <img id="drawer-image" src="" alt="Not görseli">
+                </div>
+
+                <div class="drawer-content-box">
+                    <p id="drawer-content">Not detayları burada görüntülenecektir.</p>
+                </div>
+
+                <div id="drawer-url-wrapper" class="drawer-url-box" style="display:none;">
+                    <span class="link-label">Link:</span>
+                    <a id="drawer-url" href="#" target="_blank" rel="noopener">Bağlantıya Git ↗</a>
+                </div>
+
+                <!-- Expiry Date Control -->
+                <div class="expiry-control-card">
+                    <div class="expiry-info">
+                        <span>Son Geçerlilik: <strong id="drawer-expiry-date">Belirtilmedi</strong></span>
+                    </div>
+                    <button id="toggle-status-btn" class="btn btn-sm secondary-btn">
+                        ⌛ Süresi Doldu Olarak İşaretle
+                    </button>
+                </div>
+
+                <!-- Tags Section -->
+                <div class="drawer-section">
+                    <h3>Etiketler</h3>
+                    <div id="drawer-tags" class="tags-cloud"></div>
+                </div>
+
+                <!-- Connected Correlations List -->
+                <div class="drawer-section">
+                    <div class="section-title-row">
+                        <h3>Korelasyonlar</h3>
+                        <button id="add-correlation-btn" class="btn btn-xs outline-btn">+ Bağlantı Ekle</button>
+                    </div>
+                    <div id="drawer-connections" class="connections-list"></div>
+                </div>
+            </div>
+
+            <div class="drawer-footer">
+                <button id="edit-node-btn" class="btn secondary-btn">✏️ Düzenle</button>
+                <button id="delete-node-btn" class="btn danger-btn">🗑️ Sil</button>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Modals -->
+    <div id="note-modal" class="modal-backdrop" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Yeni Fikir / Not Ekle</h3>
+                <button class="close-modal-btn icon-btn">✕</button>
+            </div>
+            <form id="note-form">
+                <div class="form-source-tabs">
+                    <label class="radio-tab active">
+                        <input type="radio" name="modal-source" value="phone" checked>
+                        <span>📱 Telefon</span>
+                    </label>
+                    <label class="radio-tab">
+                        <input type="radio" name="modal-source" value="instagram">
+                        <span>📸 Insta</span>
+                    </label>
+                    <label class="radio-tab">
+                        <input type="radio" name="modal-source" value="twitter">
+                        <span>🐦 X</span>
+                    </label>
+                    <label class="radio-tab">
+                        <input type="radio" name="modal-source" value="physical">
+                        <span>📝 Defter</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="input-title">Başlık *</label>
+                    <input type="text" id="input-title" required placeholder="Fikir başlığı...">
+                </div>
+
+                <div class="form-group">
+                    <label for="input-content">İçerik *</label>
+                    <textarea id="input-content" rows="3" required placeholder="Fikir detayları veya kod güncellemesi..."></textarea>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="input-is-agent-task">
+                        <span>🤖 Bu bir Otonom Kod Güncelleme Komutudur</span>
+                    </label>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1" id="url-group" style="display:none;">
+                        <label for="input-url">Link (URL)</label>
+                        <input type="url" id="input-url" placeholder="https://...">
+                    </div>
+                    <div class="form-group flex-1" id="image-group">
+                        <label for="input-image">Görsel URL</label>
+                        <input type="text" id="input-image" placeholder="https://...">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="input-tags">Etiketler</label>
+                        <input type="text" id="input-tags" placeholder="saas, otomasyon...">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="input-expiry">Son Geçerlilik</label>
+                        <input type="date" id="input-expiry">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn secondary-btn close-modal-btn">İptal</button>
+                    <button type="submit" class="btn primary-btn">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Bulk Importer -->
+    <div id="bulk-modal" class="modal-backdrop" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>📦 Telefon Notlarını Toplu İçe Aktar</h3>
+                <button class="close-modal-btn icon-btn">✕</button>
+            </div>
+            <form id="bulk-form">
+                <div style="padding:20px;">
+                    <p class="help-text" style="margin-bottom:12px; font-size:0.8rem; line-height:1.4;">
+                        Telefon Notlarınızdaki tüm notlarınızı buraya yapıştırın. Sistem bunları <strong>otomatik ayrıştırıp tek tıkla yükleyecektir!</strong>
+                    </p>
+
+                    <div class="form-group">
+                        <label for="bulk-text-input">Toplu Not Metni *</label>
+                        <textarea id="bulk-text-input" rows="8" required placeholder="Notlarınızı buraya yapıştırın..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="bulk-source">Kaynak</label>
+                            <select id="bulk-source">
+                                <option value="phone">📱 Telefon Notları</option>
+                                <option value="physical">📝 Fiziksel Defter</option>
+                                <option value="instagram">📸 Instagram Metinleri</option>
+                                <option value="twitter">🐦 Twitter / X</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="bulk-default-tag">Varsayılan Etiket</label>
+                            <input type="text" id="bulk-default-tag" placeholder="toplu-aktarım">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn secondary-btn close-modal-btn">İptal</button>
+                    <button type="submit" class="btn primary-btn">⚡ Toplu Yükle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal OCR -->
+    <div id="ocr-modal" class="modal-backdrop" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>📸 Defter Notu Fotoğrafı Okuyucu (OCR)</h3>
+                <button class="close-modal-btn icon-btn">✕</button>
+            </div>
+            <div class="ocr-body" style="padding:20px;">
+                <div class="ocr-dropzone" id="ocr-dropzone">
+                    <div class="ocr-drop-icon">📷</div>
+                    <p>Defter Fotoğrafını Yükleyin veya Seçin</p>
+                    <input type="file" id="ocr-file-input" accept="image/*" style="display:none;">
+                    <button id="trigger-file-select" class="btn secondary-btn btn-sm" style="margin-top:10px;">Fotoğraf Seç</button>
+                </div>
+                <div class="sample-ocr-buttons" style="margin-top:14px;">
+                    <span class="help-text">Örnek Defter Notları:</span>
+                    <div style="display:flex; gap:6px; margin-top:6px;">
+                        <button class="btn btn-xs outline-btn sample-ocr-preset" data-preset="ai_gnn">📝 Nöral Ağ Notu</button>
+                        <button class="btn btn-xs outline-btn sample-ocr-preset" data-preset="saas_plan">📝 SaaS Satış Planı</button>
+                    </div>
+                </div>
+                <div id="ocr-result-box" class="synth-output-box" style="margin-top:14px; display:none;">
+                    <div id="ocr-loading" class="synth-loading" style="display:none;">
+                        <div class="spinner"></div>
+                        <span>Defter metni okunuyor...</span>
+                    </div>
+                    <div id="ocr-parsed-content" style="display:none;">
+                        <h4 style="color:var(--accent-cyan);">✨ Okunan Metin:</h4>
+                        <p id="ocr-extracted-text" style="font-size:0.85rem; line-height:1.4; color:#E2E8F0; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;"></p>
+                        <button id="add-ocr-to-map-btn" class="btn primary-btn btn-sm" style="margin-top:10px;">+ Haritaya Ekle</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn secondary-btn close-modal-btn">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Link -->
+    <div id="link-modal" class="modal-backdrop" style="display:none;">
+        <div class="modal-card modal-sm">
+            <div class="modal-header">
+                <h3>Korelasyon Oluştur</h3>
+                <button class="close-modal-btn icon-btn">✕</button>
+            </div>
+            <form id="link-form">
+                <div class="form-group">
+                    <label for="link-source">1. Fikir</label>
+                    <select id="link-source" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="link-target">2. Fikir</label>
+                    <select id="link-target" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="link-label">Bağlantı Nedeni</label>
+                    <input type="text" id="link-label" placeholder="örn. Tasarım İlhamı...">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn secondary-btn close-modal-btn">İptal</button>
+                    <button type="submit" class="btn primary-btn">Bağlantıyı Kur</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Synthesizer -->
+    <div id="synth-modal" class="modal-backdrop" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>🧠 Fikir Sentezleyici</h3>
+                <button class="close-modal-btn icon-btn">✕</button>
+            </div>
+            <div class="synth-body">
+                <div id="synth-selected-list" class="synth-chips"></div>
+                <div class="synth-output-box">
+                    <div id="synth-loading" class="synth-loading" style="display:none;">
+                        <div class="spinner"></div>
+                        <span>Fikirler sentezleniyor...</span>
+                    </div>
+                    <div id="synth-result" class="synth-result">
+                        <h4>✨ Sentezlenen Hipotez:</h4>
+                        <p id="synth-text"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn primary-btn" id="generate-synth-btn">⚡ Sentezle</button>
+                <button type="button" class="btn secondary-btn close-modal-btn">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="sampleData.js"></script>
+    <script src="graph.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
