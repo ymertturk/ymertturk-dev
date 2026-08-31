@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon FBA Stok & Satış Takip Paneli</title>
+  <!-- Google Fonts - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SheetJS CDN (XLSX parsing and exporting) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234f46e5'/%3E%3Cstop offset='100%25' stop-color='%239333ea'/%3E%3C/linearGradient%3E%3ClinearGradient id='ar' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='100%25' stop-color='%2322c55e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='%230f172a' stroke='url(%23bg)' stroke-width='2.5'/%3E%3Cpath d='M32 10 L52 20 L32 30 L12 20 Z' fill='url(%23bg)' opacity='0.9'/%3E%3Cpath d='M12 20 L32 30 L32 50 L12 40 Z' fill='%233730a3' opacity='0.95'/%3E%3Cpath d='M32 30 L52 20 L52 40 L32 50 Z' fill='%236b21a8' opacity='0.95'/%3E%3Cpath d='M26 13 L38 19 L38 23 L26 17 Z' fill='%23fbbf24' opacity='0.8'/%3E%3Cpath d='M16 44 L28 34 L36 40 L48 24' fill='none' stroke='url(%23ar)' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M40 24 L48 24 L48 32' fill='none' stroke='url(%23ar)' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="shortcut icon" href="favicon.svg">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">📦</span>
+          <h2>FBA Tracker</h2>
+        </div>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <a href="#" class="menu-item active" data-tab="dashboard">
+          <span class="menu-icon">📊</span>
+          <span>Genel Bakış</span>
+        </a>
+        <a href="#" class="menu-item" data-tab="shipments">
+          <span class="menu-icon">📥</span>
+          <span>Koliler & Stok</span>
+        </a>
+        <a href="#" class="menu-item" data-tab="import">
+          <span class="menu-icon">📤</span>
+          <span>Satış Yükle</span>
+        </a>
+        <a href="#" class="menu-item" data-tab="returns">
+          <span class="menu-icon">🔄</span>
+          <span>İadeler & Refund</span>
+        </a>
+        <a href="#" class="menu-item" data-tab="customers">
+          <span class="menu-icon">✉️</span>
+          <span>Müşteri Mailleri</span>
+        </a>
+        <a href="#" class="menu-item" data-tab="settings">
+          <span class="menu-icon">⚙️</span>
+          <span>Ayarlar & Yedek</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="version">v1.6.0 Pro</div>
+        <div class="author">Antigravity Coding</div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top header bar -->
+      <header class="top-header">
+        <div class="header-title">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <h1 id="page-title" style="margin:0;">Genel Bakış</h1>
+            <span class="badge badge-success" style="font-size:10px; background:rgba(16,185,129,0.2); color:#10b981; border:1px solid rgba(16,185,129,0.3); padding:2px 6px;">v2.2</span>
+          </div>
+          <p id="page-subtitle" style="margin-top:2px;">Amazon FBA envanter ve satış analizi</p>
+        </div>
+        <div class="header-actions" style="display:flex; gap:10px; align-items:center;">
+          <button class="btn btn-sm btn-primary" onclick="openExecutiveReportModal()" style="background: linear-gradient(135deg, #a855f7, #6366f1); border:none; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);">✨ Görsel Rapor Karnesi</button>
+          <button class="btn btn-sm btn-success" onclick="exportDataToExcel()">📊 Excel Raporu İndir</button>
+          <div class="date-badge" id="current-date-badge">24 Temmuz 2026</div>
+        </div>
+      </header>
+
+      <!-- TAB 1: DASHBOARD -->
+      <section id="tab-dashboard" class="tab-content active">
+        <!-- KPI Cards Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card glass">
+            <div class="kpi-info">
+              <span class="kpi-label">Aktif FBA Stoğu</span>
+              <h3 class="kpi-value" id="kpi-active-stock">0</h3>
+              <span class="kpi-subtext" id="kpi-total-sent">Toplam gönderilen: 0</span>
+            </div>
+            <div class="kpi-icon bg-blue">📥</div>
+          </div>
+          
+          <div class="kpi-card glass">
+            <div class="kpi-info">
+              <span class="kpi-label">Toplam Satış</span>
+              <h3 class="kpi-value" id="kpi-total-sales">0</h3>
+              <span class="kpi-subtext text-green" id="kpi-sales-rate">Satış oranı: %0</span>
+            </div>
+            <div class="kpi-icon bg-green">🛒</div>
+          </div>
+
+          <div class="kpi-card glass">
+            <div class="kpi-info">
+              <span class="kpi-label">Aktif Stok Maliyeti</span>
+              <h3 class="kpi-value text-orange" id="kpi-stock-cost">0 TL</h3>
+              <span class="kpi-subtext" id="kpi-total-cost-sent">Gönderilen maliyet: 0 TL</span>
+            </div>
+            <div class="kpi-icon bg-orange">📉</div>
+          </div>
+
+          <div class="kpi-card glass">
+            <div class="kpi-info">
+              <span class="kpi-label">Elde Edilen Ciro (Kasa)</span>
+              <h3 class="kpi-value text-blue" id="kpi-realized-revenue">0 TL</h3>
+              <span class="kpi-subtext">Gerçekleşen satış cirosu</span>
+            </div>
+            <div class="kpi-icon bg-blue">💰</div>
+          </div>
+
+          <div class="kpi-card glass">
+            <div class="kpi-info">
+              <span class="kpi-label">Stoktaki Beklenen Ciro (Potansiyel)</span>
+              <h3 class="kpi-value" style="color: #38bdf8;" id="kpi-expected-remaining-revenue">0 TL</h3>
+              <span class="kpi-subtext" id="kpi-total-expected-revenue">Toplam hedef ciro: 0 TL</span>
+            </div>
+            <div class="kpi-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">🎯</div>
+          </div>
+
+          <div class="kpi-card glass">
+            <div class="kpi-info">
+              <span class="kpi-label">Gerçekleşen Net Kâr</span>
+              <h3 class="kpi-value text-green" id="kpi-net-profit">0 TL</h3>
+              <span class="kpi-subtext" id="kpi-expected-profit">Beklenen kalan kâr: 0 TL</span>
+            </div>
+            <div class="kpi-icon bg-green">🔥</div>
+          </div>
+
+          <div class="kpi-card glass">
+            <div class="kpi-info">
+              <span class="kpi-label">Refund & Geri Çekme</span>
+              <h3 class="kpi-value text-red" id="kpi-pending-reimburse">0</h3>
+              <span class="kpi-subtext" id="kpi-reimburse-sub">Bekleyen iade işlemleri</span>
+            </div>
+            <div class="kpi-icon bg-red">⚠️</div>
+          </div>
+
+          <div class="kpi-card glass">
+            <div class="kpi-info">
+              <span class="kpi-label">Günlük Satış Hızı (Ortalama)</span>
+              <h3 class="kpi-value" style="color: #a855f7;" id="kpi-daily-velocity">0.0 adet/gün</h3>
+              <span class="kpi-subtext" id="kpi-days-of-supply">Tahmini stok dayanma: 0 gün</span>
+            </div>
+            <div class="kpi-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">⚡</div>
+          </div>
+        </div>
+
+        <!-- Charts and Age Section -->
+        <div class="dashboard-grid">
+          <!-- Stock Age Breakdown -->
+          <div class="dashboard-card glass col-2">
+            <div class="card-header">
+              <h3>Stok Yaş Dağılımı</h3>
+              <span class="tooltip-icon" title="Kolilerin depoda kaldığı gün sayısına göre kalan stoklar">ℹ️</span>
+            </div>
+            <div class="card-body chart-container-wrapper">
+              <div class="chart-container">
+                <canvas id="stockAgeChart"></canvas>
+              </div>
+              <div class="chart-legend" id="stock-age-legend">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Checklist / Stock Alerts -->
+          <div class="dashboard-card glass">
+            <div class="card-header">
+              <h3>Kritik Stok Uyarısı (60+ Gün)</h3>
+            </div>
+            <div class="card-body overflow-y scroll-bar" id="critical-stock-alerts">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Best Sellers & Pending Orders Stack -->
+        <div class="dashboard-grid second-row">
+          <!-- Best Sellers -->
+          <div class="dashboard-card glass col-2">
+            <div class="card-header">
+              <h3>🏆 En Çok Satan Ürünler</h3>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive" id="best-sellers-scroll" style="max-height: none; transition: max-height 0.3s ease;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>ASIN</th>
+                      <th>Model Kodu</th>
+                      <th>Gönderilen</th>
+                      <th>Satılan</th>
+                      <th>Kalan Stok</th>
+                      <th>Satış Hızı (Oran)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="best-sellers-table-body">
+                    <!-- Injected via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right column stacked cards (Pending Orders & Stats) -->
+          <div style="display:flex; flex-direction:column; gap:24px;">
+            <!-- Pending Orders Card -->
+            <div class="dashboard-card glass" style="flex-grow:1;">
+              <div class="card-header">
+                <h3>⏳ Ödeme Bekleyen Siparişler</h3>
+                <span class="badge badge-warning" id="kpi-pending-count-badge">0</span>
+              </div>
+              <div class="card-body overflow-y scroll-bar" id="pending-orders-list" style="max-height: 220px;">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <!-- Summary Status -->
+            <div class="dashboard-card glass">
+              <div class="card-header">
+                <h3>📈 Hızlı İstatistikler</h3>
+              </div>
+              <div class="card-body" id="quick-stats-container">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: SHIPMENTS & STOCK -->
+      <section id="tab-shipments" class="tab-content">
+        <div class="section-actions">
+          <h2>Koliler ve Envanter Kontrolü</h2>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <!-- View toggles for shipments vs product consolidation -->
+            <div class="view-toggle-group glass" style="display:flex; border: 1px solid var(--glass-border); padding: 4px; border-radius: 8px;">
+              <button class="btn btn-sm btn-outline active" id="btn-view-shipments" onclick="toggleStockView('shipments')" style="border:none; margin:0;">📦 Koli Bazlı</button>
+              <button class="btn btn-sm btn-outline" id="btn-view-products" onclick="toggleStockView('products')" style="border:none; margin:0;">🔍 Ürün Bazlı</button>
+            </div>
+            <button class="btn btn-outline" onclick="openBulkDateModal()" style="display:flex; align-items:center; gap:6px;">📅 Tarihleri Düzenle</button>
+            <button class="btn btn-primary" onclick="openModal('new-shipment-modal')">➕ Yeni Koli Ekle</button>
+          </div>
+        </div>
+
+        <!-- Inventory Summary Bar (Total Boxes, Total Shipped, Remaining Active Stock) -->
+        <div class="inventory-summary-bar glass" style="display:flex; gap:24px; padding: 12px 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--glass-border); font-size:13px; color:#fff;">
+          <div>📦 Toplam Koli: <strong id="inv-summary-total-boxes" style="color:var(--primary);">0</strong></div>
+          <div style="width:1px; background:var(--glass-border); height:16px; align-self:center;"></div>
+          <div>📥 Gönderilen Toplam Ürün: <strong id="inv-summary-total-sent" style="color:var(--info);">0</strong></div>
+          <div style="width:1px; background:var(--glass-border); height:16px; align-self:center;"></div>
+          <div>✅ Kalan Aktif Stok: <strong id="inv-summary-remaining-stock" style="color:var(--success);">0</strong></div>
+        </div>
+
+        <!-- Box Status Filter Bar (Satışı Devam Eden Koliler, Tükenmiş Koliler, Tüm Koliler) -->
+        <div id="shipment-status-filter-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; background: rgba(255,255,255,0.02); padding: 8px 14px; border-radius: 10px; border: 1px solid var(--glass-border);">
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <span style="font-size:12px; color:var(--text-muted); font-weight:500;">Filtrele:</span>
+            <button class="btn btn-sm btn-primary" id="btn-filter-boxes-active" onclick="setBoxStatusFilter('active')" style="font-size:11px; padding:4px 10px;">
+              📦 Satışı Devam Eden Koliler (<span id="box-count-active">0</span>)
+            </button>
+            <button class="btn btn-sm btn-outline" id="btn-filter-boxes-completed" onclick="setBoxStatusFilter('completed')" style="font-size:11px; padding:4px 10px;">
+              ✅ Satışı Tükenmiş Koliler (<span id="box-count-completed">0</span>)
+            </button>
+            <button class="btn btn-sm btn-outline" id="btn-filter-boxes-all" onclick="setBoxStatusFilter('all')" style="font-size:11px; padding:4px 10px;">
+              📋 Tüm Koliler (<span id="box-count-all">0</span>)
+            </button>
+          </div>
+        </div>
+
+        <!-- Shipments list container (Koli Bazlı) -->
+        <div class="shipments-grid" id="shipments-list-container">
+          <!-- Injected via JS -->
+        </div>
+
+        <!-- Consolidated products container (Ürün Bazlı) -->
+        <div class="dashboard-card glass" id="products-stock-container" style="display: none; width: 100%;">
+          <div class="card-header" style="margin-bottom:15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px;">
+            <h3>🔍 Konsolide Ürün (ASIN) Stok Dağılımı</h3>
+            <input type="text" id="product-stock-search" oninput="filterProductStockTable()" placeholder="ASIN veya Model Kodu ara..." style="width: 220px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 8px; color: #fff; padding: 6px 12px; font-size:12px; outline:none;">
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ASIN</th>
+                  <th>Model Kodu</th>
+                  <th>Toplam Gönderilen</th>
+                  <th>Toplam Satılan</th>
+                  <th>Toplam Hasarlı</th>
+                  <th>Mevcut Net Stok</th>
+                  <th>⚡ Satış Hızı</th>
+                  <th>⏳ Stok Dayanma Süresi</th>
+                  <th>Koli Bazlı Dağılım (Kalan Adetler)</th>
+                </tr>
+              </thead>
+              <tbody id="products-stock-table-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: IMPORT SALES -->
+      <section id="tab-import" class="tab-content">
+        <div class="import-layout">
+          <div class="import-card glass">
+            <div class="card-header">
+              <h3>Amazon Sipariş Verilerini Yükle</h3>
+              <p>Amazon Seller Central'daki sipariş listenizi kopyalayıp aşağıdaki alana yapıştırın ya da CSV/TSV dosyasını sürükleyin.</p>
+            </div>
+            <div class="card-body">
+              <div class="drop-zone" id="csv-drop-zone">
+                <span class="drop-zone-icon">📄</span>
+                <span class="drop-zone-text">CSV/TXT Raporunu Sürükleyin veya Dosya Seçin</span>
+                <input type="file" id="csv-file-input" accept=".csv,.txt,.tsv" style="display: none;">
+              </div>
+              
+              <div class="text-paste-area">
+                <label for="paste-text-input">Veya Sipariş Tablosunu Kopyalayıp Yapıştırın (Ctrl+C / Ctrl+V):</label>
+                <textarea id="paste-text-input" placeholder="Sipariş ID   ASIN   Miktar   Tarih   Durum... sütunlarını içeren tablo satırlarını buraya yapıştırın. Sütun isimleri otomatik eşleşecektir."></textarea>
+              </div>
+
+              <div class="import-actions">
+                <button class="btn btn-outline" onclick="clearPasteArea()">Temizle</button>
+                <button class="btn btn-primary" id="btn-parse-paste" onclick="handlePasteParse()">Veriyi Analiz Et</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview & Mapping Options -->
+          <div class="import-card glass" id="import-preview-card" style="display: none;">
+            <div class="card-header">
+              <h3>Yükleme Önizleme & Eşleştirme</h3>
+              <div class="badge" id="preview-count-badge">0 Satır Bulundu</div>
+            </div>
+            <div class="card-body">
+              <div class="mapping-alert alert alert-info">
+                <strong>Sütun Eşleşmeleri Algılandı:</strong>
+                <ul id="mapping-list">
+                  <!-- Injected via JS -->
+                </ul>
+              </div>
+
+              <div class="table-responsive max-h-300">
+                <table class="data-table small-text">
+                  <thead>
+                    <tr id="preview-table-header">
+                      <!-- Injected via JS -->
+                    </tr>
+                  </thead>
+                  <tbody id="preview-table-body">
+                    <!-- Injected via JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="import-confirm-actions">
+                <button class="btn btn-outline text-red" onclick="cancelImport()">İptal Et</button>
+                <button class="btn btn-success" onclick="confirmImport()">✅ Siparişleri Stoklara İşle / Güncelle</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simple CSV Help -->
+        <div class="help-card glass margin-top-20">
+          <h4>💡 Akıllı Sipariş Yükleme Mekanizması Nasıl Çalışır?</h4>
+          <ol>
+            <li>Amazon Seller Central -> <strong>Manage Orders (Siparişleri Yönet)</strong> ekranından siparişleri kopyalayıp yapıştırabilirsiniz.</li>
+            <li>Sistem, kopyaladığınız satırlardaki <strong>Sipariş Numarası</strong> üzerinden teklik kontrolü yapar.</li>
+            <li><strong>Tekrar eden (Zaten işlenmiş) siparişler:</strong> Eğer durumları aynıysa tekrar işleme alınmaz veya koli stoğundan düşülmez.</li>
+            <li><strong>Durumu değişen siparişler:</strong> Örneğin daha önce gönderildi (`Shipped`) olarak işlenen bir sipariş, yeni yapıştırdığınız listede iade edilmiş (`Refunded` veya `Returned`) görünüyorsa, sistem bunu anında algılar, sipariş durumunu günceller ve ürünü **İadeler & Refund** listesine aktarır.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- TAB 4: RETURNS & REIMBURSEMENTS -->
+      <section id="tab-returns" class="tab-content">
+        <div class="section-actions">
+          <h2>İade ve Amazon Geri Ödeme (Reimbursement) Takibi</h2>
+        </div>
+
+        <div class="dashboard-card glass">
+          <div class="card-header">
+            <h3>⚠️ İade Edilen ve Tekrar Satılamayan Ürünler</h3>
+            <p>Müşteri iadeleri, hasarlı ürünler ve Amazon geri ödeme / adresinize geri çekme taleplerinin takibidir.</p>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Sipariş ID</th>
+                    <th>ASIN</th>
+                    <th>Model Kodu</th>
+                    <th>İade Tarihi</th>
+                    <th>İade Fiziksel Durumu</th>
+                    <th>Ödeme / Geri Çekme Durumu</th>
+                    <th>Refund Tutar</th>
+                    <th>Amazon İşlem ID</th>
+                    <th>Aksiyonlar</th>
+                  </tr>
+                </thead>
+                <tbody id="returns-table-body">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: CUSTOMERS -->
+      <section id="tab-customers" class="tab-content">
+        <div class="section-actions">
+          <h2>Müşteri E-Posta Listesi</h2>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <button class="btn btn-primary" onclick="copyAllCustomerEmails()">📋 Tüm Mailleri Kopyala</button>
+            <button class="btn btn-success" onclick="exportCustomerEmailsExcel()">📊 Mailleri Excel Olarak İndir</button>
+          </div>
+        </div>
+
+        <div class="dashboard-card glass">
+          <div class="card-header">
+            <h3>✉️ Kayıtlı Müşteri E-Posta Adresleri</h3>
+            <p>Amazon sipariş metinlerinden otomatik olarak ayrıştırılan müşteri e-posta adresleri listesi.</p>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Sipariş ID</th>
+                    <th>ASIN</th>
+                    <th>Satış Tarihi</th>
+                    <th>E-Posta Adresi</th>
+                  </tr>
+                </thead>
+                <tbody id="customers-table-body">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: SETTINGS & BACKUP -->
+      <section id="tab-settings" class="tab-content">
+        <div class="settings-grid">
+          <!-- Excel Export Card -->
+          <div class="settings-card glass">
+            <h3>📊 Çok Sayfalı Excel Raporu İndir (.xlsx)</h3>
+            <p>Sistemdeki tüm kolileri, ürün bazlı stok durumlarını ve satış detaylarını içeren 3 ayrı sayfadan oluşan detaylı bir Excel raporu indirin.</p>
+            
+            <div class="settings-actions">
+              <button class="btn btn-success" style="width: 100%" onclick="exportDataToExcel()">📊 Detaylı Excel Raporunu İndir (.xlsx)</button>
+              <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:5px; line-height:1.4;">
+                * İndirilecek dosya sayfa bazlı olarak: **Koliler**, **Stok Raporu** ve **Satış Raporu** tablolarını içerecektir.
+              </span>
+            </div>
+          </div>
+
+          <!-- Excel Archive Uploader -->
+          <div class="settings-card glass">
+            <h3>📥 Çok Sayfalı Excel Koli Arşivi Yükle (.xlsx)</h3>
+            <p>14 farklı sayfaya (sheet) yayılmış FBA koli arşivinizi ve Excel'de kayıtlı geçmiş satışlarınızı ("Satılan" sütunu) tek seferde sisteme yükleyin.</p>
+            
+            <div class="settings-actions">
+              <div class="file-upload-btn-wrapper">
+                <button class="btn btn-outline" style="color:var(--info); border-color:var(--info); width:100%;">📥 Excel Dosyası Seç (.xlsx)</button>
+                <input type="file" id="import-xlsx-input" accept=".xlsx, .xls" onchange="handleExcelImport(event)">
+              </div>
+              <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:5px; line-height:1.4;">
+                * Sistem sayfaları tarayacak, 'ASIN' ve 'Adet' kolonlarını bulup kolileri oluşturacaktır. 'Satılan' kolonu değerleri ise geçmiş sipariş logları (`HIST-EXCEL-FBA...`) oluşturarak stoklardan düşülecektir.
+              </span>
+            </div>
+          </div>
+
+          <!-- Backup Card -->
+          <div class="settings-card glass">
+            <h3>Veri Yedekleme ve Yönetimi</h3>
+            <p>Uygulamadaki tüm koli ve satış verilerinizi yedekleyebilir veya başka bir bilgisayara aktarabilirsiniz.</p>
+            
+            <div class="settings-actions">
+              <button class="btn btn-outline" onclick="exportDataJSON()">⚙️ Verileri JSON Olarak Yedekle</button>
+              
+              <div class="file-upload-btn-wrapper">
+                <button class="btn btn-outline">📤 Yedek Dosyası Yükle (.json)</button>
+                <input type="file" id="import-json-input" accept=".json" onchange="importDataJSON(event)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Mock Data and Reset Card -->
+          <div class="settings-card glass border-red">
+            <h3 class="text-red">Tehlikeli Alan</h3>
+            <p>Verileri sıfırlayabilir ya da test etmek için örnek demo verilerini yükleyebilirsiniz.</p>
+            
+            <div class="settings-actions">
+              <button class="btn btn-outline" onclick="loadMockData()">🔄 Örnek Demo Verisi Yükle</button>
+              <button class="btn btn-danger" onclick="confirmResetAll()">⚠️ Tüm Verileri Sıfırla (Temizle)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: ADD NEW SHIPMENT -->
+  <div class="modal-backdrop" id="new-shipment-modal">
+    <div class="modal glass">
+      <div class="modal-header">
+        <h3>➕ Yeni FBA Kolisi Ekle</h3>
+        <button class="close-btn" onclick="closeModal('new-shipment-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="new-shipment-form" onsubmit="handleShipmentSubmit(event)">
+          <div class="form-group-row">
+            <div class="form-group">
+              <label for="shipment-id-input">Koli Numarası / Gönderi Kodu (FBA Shipment ID)</label>
+              <input type="text" id="shipment-id-input" placeholder="Örn: FBA15M03QDK3" required>
+            </div>
+            <div class="form-group">
+              <label for="shipment-date-input">Gönderim Tarihi</label>
+              <input type="date" id="shipment-date-input" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="shipment-products-raw">
+              Koli İçeriği (Excel'den kopyalayıp doğrudan yapıştırabilirsiniz)
+              <span class="sub-label">Format: ASIN [Boşluk] Model Kodu [Boşluk] Adet [Boşluk] Alış Fiyatı [Boşluk] Satış Fiyatı (Her satıra bir ürün)</span>
+              <span class="sub-label text-blue">Örn: B0DWV5H5VJ &nbsp;&nbsp; AE-1600H-5AVDF &nbsp;&nbsp; 4 &nbsp;&nbsp; 200 &nbsp;&nbsp; 450</span>
+            </label>
+            <textarea id="shipment-products-raw" rows="6" placeholder="B0DWV5H5VJ	AE-1600H-5AVDF	4	200	450&#10;B0CNT7PLYD	A168WA-5AYDF	1	250	550" required></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-outline" onclick="closeModal('new-shipment-modal')">Vazgeç</button>
+            <button type="submit" class="btn btn-primary">Koliyi Kaydet ve Stoğa Ekle</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: UPDATE RETURN / REIMBURSEMENT -->
+  <div class="modal-backdrop" id="update-return-modal">
+    <div class="modal glass width-medium">
+      <div class="modal-header">
+        <h3>🔄 İade Durumu Güncelle</h3>
+        <button class="close-btn" onclick="closeModal('update-return-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="update-return-form" onsubmit="handleReturnUpdateSubmit(event)">
+          <input type="hidden" id="return-update-order-id">
+          <input type="hidden" id="return-update-asin">
+          
+          <div class="form-group" style="background-color: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border);">
+            <label for="return-confirm-stock" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+              <input type="checkbox" id="return-confirm-stock" onchange="handleReturnConfirmStockChange()" style="width:18px; height:18px; cursor:pointer;">
+              <span style="font-size:14px; font-weight:600; color:#fff;">Stoka Geri Girdiğini Onayla (Sellable)</span>
+            </label>
+            <span class="sub-label" style="margin-top:6px; font-size:11px; color:var(--text-muted); display:block; padding-left:28px;">
+              Eğer ürün hasarsız şekilde depoya ulaştıysa ve tekrar satılabilir durumdaysa işaretleyin. Ürün orijinal kolisinin aktif stoğuna iade edilir.
+            </span>
+          </div>
+
+          <div id="return-unsellable-options" style="margin-top:16px;">
+            <div class="form-group">
+              <label for="return-condition">Ürün Hasar Durumu (Condition)</label>
+              <select id="return-condition">
+                <option value="Defective">Defective (Kusurlu/Kullanılamaz)</option>
+                <option value="Customer Damaged">Customer Damaged (Müşteri Hasarlı)</option>
+                <option value="Carrier Damaged">Carrier Damaged (Kargo Hasarlı)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="return-reimbursement">Amazon İşlem / Geri Ödeme Süreci</label>
+              <select id="return-reimbursement" onchange="toggleReimbursementFields()">
+                <option value="Pending">Pending (Amazon Geri Ödeme Bekliyor / Talep Açılacak)</option>
+                <option value="Reimbursed">Reimbursed (Amazon Para İadesi Yaptı)</option>
+                <option value="RemovalRequested">Removal Requested (Geri Çekme/Adrese Gönderim Talebi Açıldı)</option>
+                <option value="RemovalReceived">Removal Received (Ürün Adrese Teslim Edildi)</option>
+                <option value="None">None (Geri Ödeme Alınamaz / Talep Reddedildi)</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="reimbursement-amount-group" style="display: none;">
+              <label for="return-reimbursement-amount">Amazon İade Tutarı (TL/USD)</label>
+              <input type="number" id="return-reimbursement-amount" placeholder="Örn: 220" step="any">
+            </div>
+
+            <div class="form-group" id="reimbursement-id-group" style="display: none;">
+              <label for="return-reimbursement-id">Amazon İşlem Kodu (Reimbursement ID / Removal Order ID)</label>
+              <input type="text" id="return-reimbursement-id" placeholder="Örn: 1029384756">
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-outline" onclick="closeModal('update-return-modal')">İptal</button>
+            <button type="submit" class="btn btn-primary">Güncelle ve Kaydet</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EXECUTIVE VISUAL REPORT -->
+  <div class="modal-backdrop" id="executive-report-modal">
+    <div class="modal glass width-large" style="max-width: 1000px; width: 95%;">
+      <div class="modal-header" style="border-bottom: 1px solid var(--glass-border); padding-bottom: 15px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:24px;">✨</span>
+          <div>
+            <h3 style="margin:0; font-size:18px; background: linear-gradient(135deg, #a855f7, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Amazon FBA Yönetici Görsel Rapor Karnesi</h3>
+            <span style="font-size:11px; color:var(--text-muted);" id="exec-report-date-sub">Oluşturulma Tarihi: Bugünü</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn btn-sm btn-primary" onclick="window.print()" style="background: linear-gradient(135deg, #3b82f6, #6366f1); border:none;">🖨️ PDF / Yazdır</button>
+          <button class="close-btn" onclick="closeModal('executive-report-modal')">&times;</button>
+        </div>
+      </div>
+      
+      <div class="modal-body" style="padding: 20px 0;">
+        <!-- Executive KPI Banner -->
+        <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:12px; margin-bottom:20px;">
+          <div class="glass" style="padding:12px; border-radius:10px; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2);">
+            <span style="font-size:11px; color:var(--text-muted); display:block;">Elde Edilen Ciro (Kasa)</span>
+            <h4 style="font-size:18px; color:#60a5fa; margin:4px 0 0 0;" id="exec-realized-rev">0 TL</h4>
+          </div>
+          <div class="glass" style="padding:12px; border-radius:10px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2);">
+            <span style="font-size:11px; color:var(--text-muted); display:block;">Gerçekleşen Net Kâr</span>
+            <h4 style="font-size:18px; color:#4ade80; margin:4px 0 0 0;" id="exec-net-profit">0 TL</h4>
+          </div>
+          <div class="glass" style="padding:12px; border-radius:10px; background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.2);">
+            <span style="font-size:11px; color:var(--text-muted); display:block;">Stoktaki Beklenen Ciro</span>
+            <h4 style="font-size:18px; color:#38bdf8; margin:4px 0 0 0;" id="exec-exp-rev">0 TL</h4>
+          </div>
+          <div class="glass" style="padding:12px; border-radius:10px; background:rgba(168,85,247,0.08); border:1px solid rgba(168,85,247,0.2);">
+            <span style="font-size:11px; color:var(--text-muted); display:block;">Satış Başarı Oranı</span>
+            <h4 style="font-size:18px; color:#c084fc; margin:4px 0 0 0;" id="exec-sales-rate">%0</h4>
+          </div>
+          <div class="glass" style="padding:12px; border-radius:10px; background:rgba(236,72,153,0.08); border:1px solid rgba(236,72,153,0.2);">
+            <span style="font-size:11px; color:var(--text-muted); display:block;">Ort. Satış Hızı</span>
+            <h4 style="font-size:18px; color:#f472b6; margin:4px 0 0 0;" id="exec-velocity">0.0 Adet/Gün</h4>
+          </div>
+        </div>
+
+        <!-- 4 Interactive Charts Grid -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px;">
+          <!-- Chart 1: Financial Performance Bar -->
+          <div class="glass" style="padding:15px; border-radius:12px; border:1px solid var(--glass-border);">
+            <h5 style="margin:0 0 10px 0; font-size:13px; color:#fff; display:flex; align-items:center; gap:6px;">📊 Finansal Performans Karşılaştırması</h5>
+            <div style="height:200px; position:relative;">
+              <canvas id="chart-exec-financials"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Stock Age Doughnut -->
+          <div class="glass" style="padding:15px; border-radius:12px; border:1px solid var(--glass-border);">
+            <h5 style="margin:0 0 10px 0; font-size:13px; color:#fff; display:flex; align-items:center; gap:6px;">🥧 Stok Yaş Dağılımı (Kutudaki Adetler)</h5>
+            <div style="height:200px; position:relative;">
+              <canvas id="chart-exec-stock-age"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 3: Top Selling ASINs -->
+          <div class="glass" style="padding:15px; border-radius:12px; border:1px solid var(--glass-border);">
+            <h5 style="margin:0 0 10px 0; font-size:13px; color:#fff; display:flex; align-items:center; gap:6px;">🏆 En Çok Satan İlk 5 Ürün (Satış Adedi)</h5>
+            <div style="height:200px; position:relative;">
+              <canvas id="chart-exec-bestsellers"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 4: Shipment Arrival Status -->
+          <div class="glass" style="padding:15px; border-radius:12px; border:1px solid var(--glass-border);">
+            <h5 style="margin:0 0 10px 0; font-size:13px; color:#fff; display:flex; align-items:center; gap:6px;">📦 Koli Kabul & Stok Durumu</h5>
+            <div style="height:200px; position:relative;">
+              <canvas id="chart-exec-shipment-status"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Performers Summary Table -->
+        <div class="glass" style="padding:15px; border-radius:12px; border:1px solid var(--glass-border);">
+          <h5 style="margin:0 0 10px 0; font-size:13px; color:#fff;">📋 En Çok Satan Ürünler Performans Detayı</h5>
+          <div class="table-responsive">
+            <table class="data-table small-text">
+              <thead>
+                <tr>
+                  <th>Sıra</th>
+                  <th>ASIN</th>
+                  <th>Model Kodu</th>
+                  <th>Satılan Adet</th>
+                  <th>Kalan Stok</th>
+                </tr>
+              </thead>
+              <tbody id="exec-bestsellers-table-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Javascript Scripts -->
+  <script src="mock_data.js?v=2.2"></script>
+  <script src="app.js?v=2.2"></script>
+</body>
+</html>
