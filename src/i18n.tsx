@@ -89,11 +89,28 @@ const tr: Locale = {
     projectsSubtitle: 'Üzerinde çalıştığım bazı projeler ve çözümler.',
     projects: [
         {
+            icon: '📦',
+            title: 'Amazon FBA Stok & Satış Takip',
+            description: 'FBA koli ve kutu takibi, gerçek zamanlı satış entegrasyonu, iade takibi ve 24/7 canlı bulut veritabanı senkronizasyonlu stok yönetim platformu.',
+            tech: ['JavaScript', 'HTML5', 'Chart.js', 'Netlify Functions', 'Cloud DB'],
+        },
+        {
+            icon: '⚖️',
+            title: 'Tedarikçi Fiyat Karşılaştırma',
+            description: 'Yurtdışı tedarikçi tekliflerini (Aim, TrendCaravelle vb.) gümrük vergileri (GTIP), nakliye maliyetleri ve döviz kurları ile kar-zarar kıyaslayan karar destek sistemi.',
+            tech: ['React', 'TypeScript', 'TailwindCSS', 'Vite', 'Excel/PDF Parsing'],
+        },
+        {
+            icon: '🧠',
+            title: 'MindNexus İkinci Beyin',
+            description: 'Sesli komut ayrıştırıcı, fiziksel defter OCR okuyucu, 2D nöral zihin haritası ve otonom arka plan kod ajanı destekli mobil uyumlu düşünce ağı.',
+            tech: ['Web Speech API', 'OCR Engine', 'Force Physics', 'AI Agent Bridge'],
+        },
+        {
             icon: '🏃',
             title: 'WA Puan Hesaplayıcı',
             description: 'Dünya Atletizm 2025 puanlama tablolarına dayanan denklem tabanlı puan hesaplama sistemi. 160+ yarışma, erkek/kadın, açık hava/salon desteği.',
             tech: ['React', 'TypeScript', 'Vite', 'CSS'],
-            link: '/wa-calculator/',
         },
         {
             icon: '🛒',
@@ -124,7 +141,6 @@ const tr: Locale = {
             title: 'ymertturk.dev',
             description: 'Kişisel portföy websitesi. Modern tasarım, animasyonlar, particle background ve responsive yapı.',
             tech: ['React', 'TypeScript', 'CSS', 'Vite'],
-            link: 'https://ymertturk.dev',
         },
     ],
 
@@ -173,11 +189,28 @@ const en: Locale = {
     projectsSubtitle: 'Some of the projects and solutions I\'ve worked on.',
     projects: [
         {
+            icon: '📦',
+            title: 'Amazon FBA Inventory & Sales Tracker',
+            description: 'FBA box tracking, live sales integration, return management, and 24/7 cloud database synced inventory platform.',
+            tech: ['JavaScript', 'HTML5', 'Chart.js', 'Netlify Functions', 'Cloud DB'],
+        },
+        {
+            icon: '⚖️',
+            title: 'Supplier Price Comparison Engine',
+            description: 'Decision support system evaluating overseas supplier quotes with customs duties (HS/GTIP), shipping costs, and currency conversion.',
+            tech: ['React', 'TypeScript', 'TailwindCSS', 'Vite', 'Excel/PDF Parsing'],
+        },
+        {
+            icon: '🧠',
+            title: 'MindNexus Second Brain',
+            description: 'Mobile-responsive neural mind map with voice dictation parser, physical notebook OCR reader, and autonomous background AI agent bridge.',
+            tech: ['Web Speech API', 'OCR Engine', 'Force Physics', 'AI Agent Bridge'],
+        },
+        {
             icon: '🏃',
             title: 'WA Points Calculator',
-            description: 'Equation-based scoring system built on World Athletics 2025 scoring tables. 160+ events, men/women, outdoor/indoor support.',
+            description: 'Equation-based scoring system based on World Athletics 2025 tables. Support for 160+ events, male/female, outdoor/indoor.',
             tech: ['React', 'TypeScript', 'Vite', 'CSS'],
-            link: '/wa-calculator/',
         },
         {
             icon: '🛒',
@@ -208,7 +241,6 @@ const en: Locale = {
             title: 'ymertturk.dev',
             description: 'Personal portfolio website. Modern design, animations, particle background, and responsive layout.',
             tech: ['React', 'TypeScript', 'CSS', 'Vite'],
-            link: 'https://ymertturk.dev',
         },
     ],
 
