@@ -1,7 +1,7 @@
-// Netlify Serverless Cloud Persistence Engine for ymertturk.dev (ES Module)
+// Netlify Serverless Cloud Persistence Engine for ymertturk.dev
 let inMemoryStore = {};
 
-export async function handler(event, context) {
+exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -48,4 +48,4 @@ export async function handler(event, context) {
   }
 
   return { statusCode: 405, headers, body: 'Method Not Allowed' };
-}
+};
