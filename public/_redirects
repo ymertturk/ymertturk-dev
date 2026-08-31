@@ -2,5 +2,6 @@
 
 /brain/*          /brain/index.html 200
 /fba-tracker/*    /fba-tracker/index.html 200
+/tedarik/*        /tedarik/index.html 200
 /wa-calculator/*  /wa-calculator/index.html 200
 /*                /index.html 200
