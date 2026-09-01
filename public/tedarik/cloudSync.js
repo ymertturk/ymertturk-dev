@@ -1,6 +1,6 @@
 /**
  * Universal Live Cloud Storage & Auto-Sync Engine for ymertturk.dev
- * Dual-Vercel & Netlify compatibility.
+ * Real-time 24/7 cross-device state synchronization across all browsers and mobile devices.
  */
 
 window.UniversalCloudSync = {
@@ -22,10 +22,7 @@ window.UniversalCloudSync = {
 
     async fetchCloudState(isSilent = false) {
         try {
-            let res = await fetch(`/api/sync?appId=${this.appId}`);
-            if (!res.ok) {
-                res = await fetch(`/.netlify/functions/sync?appId=${this.appId}`);
-            }
+            const res = await fetch(`/.netlify/functions/sync?appId=${this.appId}`);
             if (res.ok) {
                 const payload = await res.json();
                 if (payload && payload.data && payload.updatedAt !== this.lastSyncTime) {
@@ -43,18 +40,11 @@ window.UniversalCloudSync = {
         this.appId = appId || this.appId;
 
         try {
-            let res = await fetch(`/api/sync?appId=${this.appId}`, {
+            const res = await fetch(`/.netlify/functions/sync?appId=${this.appId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ appId: this.appId, data: stateData })
             });
-            if (!res.ok) {
-                res = await fetch(`/.netlify/functions/sync?appId=${this.appId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ appId: this.appId, data: stateData })
-                });
-            }
             if (res.ok) {
                 const payload = await res.json();
                 this.lastSyncTime = payload.updatedAt;
