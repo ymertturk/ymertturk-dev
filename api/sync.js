@@ -49,12 +49,19 @@ export default function handler(req, res) {
   }
 
   if (method === 'POST') {
-    const payload = req.body;
+    let payload = req.body;
+    if (typeof payload === 'string') {
+      try {
+        payload = JSON.parse(payload);
+      } catch (e) {}
+    }
+
     if (payload && payload.clear) {
       delete memoryStore[appId];
       saveMemoryStore(memoryStore);
       return res.status(200).json({ success: true, message: 'Cloud data cleared for ' + appId });
     }
+
     if (payload && payload.data) {
       memoryStore[appId] = {
         data: payload.data,
