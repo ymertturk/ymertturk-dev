@@ -30,6 +30,29 @@ class MindNexusApp {
         this.updateCounts();
         this.renderMobileNotesFeed();
 
+        // Handle Web Share Target incoming Apple Notes / System Notes
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedTitle = urlParams.get('title');
+        const sharedText = urlParams.get('text') || urlParams.get('url');
+
+        if (sharedText) {
+            const today = new Date().toISOString().split('T')[0];
+            const sharedNode = {
+                id: `node-shared-${Date.now()}`,
+                title: sharedTitle || sharedText.substring(0, 32) + '...',
+                content: sharedText,
+                source: 'phone',
+                tags: ['paylaşılan-not', 'telefon'],
+                date: today,
+                status: 'active',
+                color: '#00F2FE'
+            };
+            this.nodes.push(sharedNode);
+            this.runSemanticAutoLinking();
+            this.saveData();
+            this.showToast('📱 Telefon Notlar uygulamasından gelen not haritaya eklendi!');
+        }
+
         if (window.UniversalCloudSync) {
             window.UniversalCloudSync.init('mindnexus', (cloudData) => {
                 if (cloudData && Array.isArray(cloudData.nodes)) {
@@ -345,6 +368,63 @@ class MindNexusApp {
         this.graph.setData(this.nodes, this.links);
         this.closeModals();
         this.showToast('🚀 Markdown notu yüklendi & haritaya bağlandı!');
+    }
+
+    async requestDirectoryAccess() {
+        if (!('showDirectoryPicker' in window)) {
+            return this.showToast('Bu tarayıcı doğrudan klasör erişim iznini desteklemiyor. Lütfen .md dosyalarını seçerek veya yapıştırarak yükleyin.', 'warning');
+        }
+
+        try {
+            const dirHandle = await window.showDirectoryPicker({
+                mode: 'read'
+            });
+
+            this.showToast(`📁 "${dirHandle.name}" klasörüne erişim izni verildi! Notlar taranıyor...`);
+            let importedCount = 0;
+
+            for await (const entry of dirHandle.values()) {
+                if (entry.kind === 'file' && (entry.name.endsWith('.md') || entry.name.endsWith('.txt') || entry.name.endsWith('.markdown'))) {
+                    const file = await entry.getFile();
+                    const text = await file.text();
+                    if (text.trim().length > 3) {
+                        const title = entry.name.replace(/\.[^/.]+$/, "");
+                        const tagMatches = text.match(/#([\w\u00C0-\u024F\u0400-\u04FFğüşıöçĞÜŞİÖÇ-]+)/g) || [];
+                        const tags = Array.from(new Set(tagMatches.map(t => t.replace('#', '').toLowerCase()))).concat(['klasör-notu']);
+                        const today = new Date().toISOString().split('T')[0];
+
+                        const newNode = {
+                            id: `node-dir-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+                            title: title,
+                            content: text,
+                            source: 'phone',
+                            tags: tags,
+                            date: today,
+                            status: 'active',
+                            isMarkdown: true,
+                            color: '#3b82f6'
+                        };
+
+                        this.nodes.push(newNode);
+                        importedCount++;
+                    }
+                }
+            }
+
+            if (importedCount > 0) {
+                this.runSemanticAutoLinking();
+                this.saveData();
+                this.graph.setData(this.nodes, this.links);
+                this.closeModals();
+                this.showToast(`🎉 ${importedCount} adet not klasörden otomatik aktarıldı & haritaya bağlandı!`);
+            } else {
+                this.showToast('Klasörde uygun .md veya .txt not dosyası bulunamadı.', 'info');
+            }
+        } catch(e) {
+            if (e.name !== 'AbortError') {
+                this.showToast('Klasör erişim izni iptal edildi veya reddedildi.', 'warning');
+            }
+        }
     }
 
     switchViewMode(mode) {

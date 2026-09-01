@@ -9,6 +9,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -355,6 +356,10 @@
                     <span style="font-size:0.85rem; font-weight:600; color:#60a5fa;">📄 .md / .txt Dosyası Seç (veya Tıkla)</span>
                     <input type="file" id="md-file-input" accept=".md,.txt,.markdown" style="display:none;" onchange="app.handleMarkdownFileSelect(event)">
                 </div>
+
+                <button onclick="app.requestDirectoryAccess()" class="btn secondary-btn" style="width:100%; padding:10px; font-size:0.8rem; background:rgba(139, 92, 246, 0.15); border:1px solid rgba(139, 92, 246, 0.4); color:#c084fc;">
+                    📁 Bilgisayar Notlar Klasörüne Sürekli Erişim İzni Ver
+                </button>
 
                 <div class="form-group" style="margin:0;">
                     <label style="font-size:0.8rem;">Veya Markdown Metnini Buraya Yapıştır:</label>
