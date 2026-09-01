@@ -46,13 +46,26 @@ function initApp() {
   
   // Initialize 24/7 Universal Cloud Auto-Sync
   if (window.UniversalCloudSync) {
+    // If local state has real user data (> 2 shipments), immediately sync to cloud!
+    if (state && Array.isArray(state.shipments) && state.shipments.length > 2) {
+      window.UniversalCloudSync.saveState('fba_tracker', state);
+    }
+
     window.UniversalCloudSync.init('fba_tracker', (cloudData) => {
-      if (cloudData && Array.isArray(cloudData.shipments)) {
+      if (cloudData && Array.isArray(cloudData.shipments) && cloudData.shipments.length > 0) {
         state = cloudData;
+        localStorage.setItem("amazon_fba_tracker_state", JSON.stringify(state));
         renderApp();
       }
     });
   }
+
+  window.forceSyncToCloud = function() {
+    if (state && window.UniversalCloudSync) {
+      window.UniversalCloudSync.saveState("fba_tracker", state);
+      alert("☁️ Tüm FBA verileriniz (" + (state.shipments ? state.shipments.length : 0) + " koli, " + (state.sales ? state.sales.length : 0) + " satış) canlı bulut veritabanına aktarıldı! Gizli sekme, mobil ve tüm cihazlarınızda anında görünecektir.");
+    }
+  };
 
   // Set current date on header
   const todayOptions = { year: 'numeric', month: 'long', day: 'numeric' };
