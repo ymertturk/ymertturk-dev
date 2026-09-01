@@ -626,13 +626,46 @@ class MindNexusApp {
         }, 1200);
     }
 
+    extractWords(text) {
+        if (!text) return new Set();
+        const stopWords = new Set(['ve', 'veya', 'bir', 'bu', 'da', 'de', 'ile', 'için', 'bu', 'çok', 'daha', 'en', 'gibi', 'olan', 'olarak', 'göre', 'kadar', 'sonra', 'önce', 'hem', 'ama', 'fakat', 'lakin', 'yani', 'ise']);
+        const tokens = text.toLowerCase()
+            .replace(/[^\w\sğüşıöçĞÜŞİÖÇ]/g, ' ')
+            .split(/\s+/)
+            .filter(w => w.length > 2 && !stopWords.has(w));
+        return new Set(tokens);
+    }
+
+    computeContextSimilarity(nodeA, nodeB) {
+        const wordsA = this.extractWords(`${nodeA.title} ${nodeA.content}`);
+        const wordsB = this.extractWords(`${nodeB.title} ${nodeB.content}`);
+        
+        let intersection = 0;
+        let commonWord = '';
+        wordsA.forEach(w => {
+            if (wordsB.has(w)) {
+                intersection++;
+                if (!commonWord) commonWord = w;
+            }
+        });
+        
+        const union = new Set([...wordsA, ...wordsB]).size;
+        const jaccard = union > 0 ? intersection / union : 0;
+
+        const commonTags = (nodeA.tags || []).filter(t => (nodeB.tags || []).includes(t));
+        
+        return {
+            score: jaccard + (commonTags.length * 0.3),
+            label: commonTags.length > 0 ? `#${commonTags[0]}` : (commonWord ? `Bağlam: ${commonWord}` : 'Otomatik Bağlantı')
+        };
+    }
+
     runSemanticAutoLinking() {
         let createdCount = 0;
         for (let i = 0; i < this.nodes.length; i++) {
             for (let j = i + 1; j < this.nodes.length; j++) {
                 const n1 = this.nodes[i];
                 const n2 = this.nodes[j];
-                const commonTags = (n1.tags || []).filter(t => (n2.tags || []).includes(t));
 
                 const exists = this.links.some(l => {
                     const sId = typeof l.source === 'object' ? l.source.id : l.source;
@@ -640,14 +673,17 @@ class MindNexusApp {
                     return (sId === n1.id && tId === n2.id) || (sId === n2.id && tId === n1.id);
                 });
 
-                if (!exists && commonTags.length > 0) {
-                    this.links.push({
-                        source: n1.id,
-                        target: n2.id,
-                        label: `🤖 AI Korelasyon: #${commonTags[0]}`,
-                        strength: 0.8
-                    });
-                    createdCount++;
+                if (!exists) {
+                    const sim = this.computeContextSimilarity(n1, n2);
+                    if (sim.score >= 0.12) {
+                        this.links.push({
+                            source: n1.id,
+                            target: n2.id,
+                            label: `🤖 AI Bağlam: ${sim.label}`,
+                            strength: Math.min(1.0, 0.5 + sim.score)
+                        });
+                        createdCount++;
+                    }
                 }
             }
         }
@@ -655,9 +691,9 @@ class MindNexusApp {
         if (createdCount > 0) {
             this.saveData();
             this.graph.setData(this.nodes, this.links);
-            this.showToast(`🤖 ${createdCount} yeni korelasyon kuruldu!`);
+            this.showToast(`🤖 ${createdCount} yeni bağlamsal korelasyon kuruldu!`);
         } else {
-            this.showToast('Tüm korelasyonlar zaten kurulmuş.', 'info');
+            this.showToast('Tüm bağlamsal korelasyonlar zaten kurulmuş.', 'info');
         }
     }
 
