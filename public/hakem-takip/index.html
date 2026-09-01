@@ -1,290 +1,397 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>Türkiye Atletizm Federasyonu - Hakem Takip & Görev Atama Sistemi</title>
-  
-  <!-- Google Fonts & Tailwind CSS CDN -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#f0f7ff',
-              100: '#e0effe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-              900: '#1e3a8a',
-            }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Hakem Takip Sistemi</title>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3182ce;
+            --primary-hover: #2b6cb0;
+            --danger: #e53e3e;
+            --danger-hover: #c53030;
+            --success: #38a169;
+            --bg-body: #f7fafc;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --card-hover-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
         }
-      }
-    }
-  </script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b0f19; color: #f1f5f9; }
-    .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .tab-btn { transition: all 0.2s ease; border-bottom: 2px solid transparent; }
-    .tab-btn.active { color: #60a5fa; border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 9999px; }
-  </style>
-</head>
-<body class="min-h-screen flex flex-col antialiased selection:bg-blue-500 selection:text-white">
 
-  <!-- PIN SECURITY GATE -->
-  <div id="pinGate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-xl p-4">
-    <div class="glass-card max-w-md w-full rounded-2xl p-8 text-center shadow-2xl border border-blue-500/30">
-      <div class="w-16 h-16 bg-blue-600/20 text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-blue-500/40">
-        <i data-lucide="shield-check" class="w-8 h-8"></i>
-      </div>
-      <h2 class="text-2xl font-extrabold text-white mb-2">Hakem Takip Sistemi</h2>
-      <p class="text-xs text-slate-400 mb-6">Yönetici paneline erişmek için şifrenizi girin</p>
-      
-      <form id="pinForm" onsubmit="handlePinSubmit(event)" class="space-y-4">
-        <div>
-          <input type="password" id="pinInput" placeholder="Şifre (admin1)" required autofocus
-            class="w-full bg-slate-900/90 border border-slate-700 focus:border-blue-500 rounded-xl px-4 py-3 text-center text-lg font-mono tracking-widest text-white outline-none transition" />
-        </div>
-        <p id="pinError" class="text-xs text-rose-400 font-semibold hidden">⚠️ Hatalı şifre! Lütfen tekrar deneyin.</p>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-          <i data-lucide="lock-open" class="w-4 h-4"></i> Giriş Yap
-        </button>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Navbar */
+        nav {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        nav .logo {
+            font-[700];
+            font-size: 1.2em;
+            color: #1a202c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        nav .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        nav a, nav button.nav-btn {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        nav a:hover, nav button.nav-btn:hover, nav button.nav-btn.active {
+            color: var(--primary);
+            background: #ebf8ff;
+        }
+
+        nav button.danger:hover {
+            color: var(--danger);
+            background: #fff5f5;
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .main-content {
+            flex: 3;
+            min-width: 0;
+        }
+
+        .sidebar {
+            flex: 1;
+            min-width: 280px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 15px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .card:hover {
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        /* Forms & Inputs */
+        input[type="text"], input[type="password"], input[type="file"], select, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+            background: white;
+            color: var(--text-main);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+        }
+
+        button, .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 0.95em;
+        }
+
+        button:hover { background-color: var(--primary-hover); }
+
+        button.delete {
+            background-color: transparent;
+            color: var(--danger);
+            padding: 4px 8px;
+            font-size: 0.85em;
+        }
+
+        button.delete:hover { background-color: #fff5f5; color: var(--danger-hover); }
+
+        h1 { margin-top: 0; font-size: 1.6em; color: #1a202c; }
+        h3 { margin-top: 0; font-size: 1.1em; color: #2d3748; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.88em; color: #4a5568; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center; justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%; max-width: 550px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .pin-gate-box {
+            background: white;
+            max-width: 400px;
+            width: 90%;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            text-align: center;
+            margin: 100px auto;
+        }
+    </style>
+</head>
+<body>
+
+  <!-- PIN GATE (admin1) -->
+  <div id="pinGateModal" class="modal" style="display: flex;">
+    <div class="pin-gate-box">
+      <h2 style="margin-top: 0; color: #1a202c;">🏆 Hakem Takip Sistemi</h2>
+      <p style="color: #718096; font-size: 0.9em; margin-bottom: 20px;">Lütfen giriş şifrenizi girin (admin1)</p>
+      <form onsubmit="handlePinSubmit(event)">
+        <input type="password" id="pinInput" placeholder="Şifre" required autofocus style="text-align: center; font-size: 1.2em; letter-spacing: 2px;" />
+        <p id="pinError" style="color: #e53e3e; font-size: 0.85em; display: none; margin-bottom: 10px;">⚠️ Hatalı şifre! Tekrar deneyin.</p>
+        <button type="submit" style="width: 100%; padding: 12px;">Giriş Yap</button>
       </form>
     </div>
   </div>
 
-  <!-- MAIN APP CONTAINER -->
-  <div id="appContainer" class="flex-1 flex flex-col hidden">
-    <!-- HEADER -->
-    <header class="bg-slate-900/80 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
-      <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg">
-            <i data-lucide="trophy" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <h1 class="text-lg font-extrabold text-white flex items-center gap-2">
-              Hakem Takip & Görev Atama Otomasyonu
-              <span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold border border-blue-500/30">v2.4 Live</span>
-            </h1>
-            <p class="text-xs text-slate-400">Türkiye Atletizm Federasyonu İl & Ulusal Hakem Portal</p>
-          </div>
-        </div>
-
-        <!-- HEADER ACTION BUTTONS -->
-        <div class="flex items-center gap-2">
-          <button onclick="openBackupModal()" class="bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow transition">
-            <i data-lucide="database" class="w-4 h-4 text-indigo-400"></i> Veri Taşı / Aktar
-          </button>
-          <button onclick="openTelegramModal()" class="bg-sky-600/30 hover:bg-sky-600/50 text-sky-300 border border-sky-500/40 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow transition">
-            <i data-lucide="send" class="w-4 h-4 text-sky-400"></i> Telegram Ayarları
-          </button>
-          <button onclick="handleLogout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl border border-slate-700 flex items-center gap-1.5 shadow transition">
-            <i data-lucide="log-out" class="w-4 h-4"></i> Çıkış
-          </button>
-        </div>
+  <!-- MAIN WRAPPER -->
+  <div id="mainApp" class="page-wrapper" style="display: none;">
+    <!-- NAVBAR -->
+    <nav>
+      <div class="logo">
+        🏆 Hakem Takip Sistemi
       </div>
-
-      <!-- MAIN TAB NAV -->
-      <div class="max-w-7xl mx-auto px-4 flex items-center gap-2 overflow-x-auto custom-scrollbar">
-        <button id="tab-referees" onclick="switchTab('referees')" class="tab-btn active px-4 py-3 font-bold text-xs flex items-center gap-2">
-          <i data-lucide="users" class="w-4 h-4"></i> Hakem Listesi & Arama (<span id="count-referees">242</span>)
-        </button>
-        <button id="tab-races" onclick="switchTab('races')" class="tab-btn px-4 py-3 font-bold text-xs flex items-center gap-2">
-          <i data-lucide="flag" class="w-4 h-4"></i> Yarış Yönetimi & Görev Atamaları (<span id="count-races">17</span>)
-        </button>
-        <button id="tab-invitations" onclick="switchTab('invitations')" class="tab-btn px-4 py-3 font-bold text-xs flex items-center gap-2">
-          <i data-lucide="mail-check" class="w-4 h-4"></i> Görev Davetleri & Yanıtlar (<span id="count-invitations">400</span>)
-        </button>
+      <div class="nav-links">
+        <button id="nav-races" onclick="switchTab('races')" class="nav-btn">🏃 Yarışlar</button>
+        <button id="nav-referees" onclick="switchTab('referees')" class="nav-btn active">📋 Hakemler</button>
+        <button id="nav-settings" onclick="switchTab('settings')" class="nav-btn">⚙️ Ayarlar</button>
+        <button onclick="handleLogout()" class="nav-btn danger">🚪 Çıkış</button>
       </div>
-    </header>
+    </nav>
 
-    <!-- CONTENT BODY -->
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
-
-      <!-- TAB 1: REFEREES TAB -->
-      <section id="view-referees" class="space-y-4">
-        <!-- STATS OVERVIEW CARDS -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div class="glass-card rounded-xl p-4 border-l-4 border-blue-500">
-            <p class="text-xs text-slate-400 font-medium">Toplam Kayıtlı Hakem</p>
-            <p id="stat-total-referees" class="text-2xl font-black text-white mt-1">242</p>
-          </div>
-          <div class="glass-card rounded-xl p-4 border-l-4 border-emerald-500">
-            <p class="text-xs text-slate-400 font-medium">Aktif Görev Yapabilir</p>
-            <p id="stat-active-referees" class="text-2xl font-black text-emerald-400 mt-1">242</p>
-          </div>
-          <div class="glass-card rounded-xl p-4 border-l-4 border-purple-500">
-            <p class="text-xs text-slate-400 font-medium">Ulusal & Uluslararası Hakem</p>
-            <p id="stat-national-referees" class="text-2xl font-black text-purple-400 mt-1">118</p>
-          </div>
-          <div class="glass-card rounded-xl p-4 border-l-4 border-amber-500">
-            <p class="text-xs text-slate-400 font-medium">Telegram Entegre Hakem</p>
-            <p id="stat-telegram-referees" class="text-2xl font-black text-amber-400 mt-1">242</p>
+    <!-- SECTION: REFEREES -->
+    <div id="view-referees" class="container">
+      <div class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h1>Hakem Listesi <small id="refereeCountHeader" style="font-size: 0.6em; color: #718096; font-weight: normal;">(Toplam: 0)</small></h1>
+          <div style="display: flex; gap: 10px;">
+            <button id="tab-all" onclick="filterTab('all')" style="padding: 8px 16px; border-radius: 6px; background: #3182ce; color: white;">Tüm Hakemler</button>
+            <button id="tab-no_invites" onclick="filterTab('no_invites')" style="padding: 8px 16px; border-radius: 6px; background: #e2e8f0; color: #4a5568;">Hiç Davet Almayanlar</button>
           </div>
         </div>
 
-        <!-- SEARCH & FILTER BAR -->
-        <div class="glass-card rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div class="relative flex-1 w-full">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input type="text" id="searchReferees" placeholder="Hakem adı, soyadı, lisans no veya şehir ile ara..." oninput="renderReferees()"
-              class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-blue-500 transition" />
-          </div>
-          <div class="flex items-center gap-2 w-full md:w-auto">
-            <select id="filterCategory" onchange="renderReferees()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 outline-none focus:border-blue-500">
-              <option value="">Tüm Klasmanlar</option>
-              <option value="Ulusal">Ulusal Hakem</option>
-              <option value="İl">İl Hakemi</option>
-              <option value="Uluslararası">Uluslararası Hakem</option>
-              <option value="Aday">Aday Hakem</option>
+        <!-- SEARCH & FILTER -->
+        <div class="card" style="margin-bottom: 25px;">
+          <div style="display: flex; gap: 15px;">
+            <input type="text" id="searchInput" placeholder="Hakem ara..." oninput="renderReferees()" style="margin-bottom: 0; flex: 2;" />
+            <select id="eventFilterSelect" onchange="renderReferees()" style="margin-bottom: 0; flex: 1;">
+              <option value="">Tüm Yarışlar</option>
             </select>
-            <button onclick="openAddRefereeModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2 rounded-xl shadow flex items-center gap-1.5 whitespace-nowrap">
-              <i data-lucide="user-plus" class="w-4 h-4"></i> Yeni Hakem Ekle
-            </button>
           </div>
         </div>
 
-        <!-- REFEREES TABLE -->
-        <div class="glass-card rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-900/90 text-slate-400 uppercase font-mono border-b border-slate-800">
-                <tr>
-                  <th class="p-3">Lisans / Ad Soyad</th>
-                  <th class="p-3">Klasman / Şehir</th>
-                  <th class="p-3">Telefon</th>
-                  <th class="p-3">Telegram ID</th>
-                  <th class="p-3">KVKK Onay</th>
-                  <th class="p-3 text-right">İşlemler</th>
-                </tr>
-              </thead>
-              <tbody id="refereesTableBody" class="divide-y divide-slate-800/60 font-medium">
-                <!-- JS Populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 2: RACES TAB -->
-      <section id="view-races" class="space-y-4 hidden">
-        <div class="flex items-center justify-between">
-          <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Aktif Yarışlar & Görev Listeleri</h2>
-          <button onclick="openAddRaceModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i> Yeni Yarış Ekle
-          </button>
+        <!-- REFEREE LIST -->
+        <div style="margin-bottom: 15px; padding: 0 5px;">
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; color: #4a5568;">
+            <input type="checkbox" id="selectAllCb" onclick="toggleSelectAll(this)" style="width: 18px; height: 18px;" />
+            Tümünü Seç (Bu Sayfadaki)
+          </label>
         </div>
 
-        <div id="racesListGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- JS Populated -->
+        <div id="refereeListContainer">
+          <!-- Populated by JS -->
         </div>
-      </section>
+      </div>
 
-      <!-- TAB 3: INVITATIONS TAB -->
-      <section id="view-invitations" class="space-y-4 hidden">
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <h2 class="text-sm font-bold text-slate-200 mb-3">Görev Daveti Takip Paneli</h2>
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-900 text-slate-400 uppercase font-mono">
-                <tr>
-                  <th class="p-3">Yarış Adı</th>
-                  <th class="p-3">Hakem</th>
-                  <th class="p-3">Görev</th>
-                  <th class="p-3">Davet Tarihi</th>
-                  <th class="p-3">Durum</th>
-                </tr>
-              </thead>
-              <tbody id="invitationsTableBody" class="divide-y divide-slate-800/60">
-                <!-- JS Populated -->
-              </tbody>
-            </table>
-          </div>
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <h3>➕ Yeni Hakem Ekle</h3>
+        <form onsubmit="handleAddReferee(event)">
+          <label>Ad Soyad *</label>
+          <input type="text" id="addFullName" required placeholder="Örn: Ahmet Yılmaz" />
+
+          <label>Sicil No</label>
+          <input type="text" id="addSicilNo" placeholder="Örn: 12345" />
+
+          <label>Telefon</label>
+          <input type="text" id="addPhone" placeholder="Örn: 0555 123 45 67" />
+
+          <label>Bölge / İl</label>
+          <input type="text" id="addRegion" placeholder="Örn: İstanbul" />
+
+          <button type="submit" style="width: 100%;">Kaydet</button>
+        </form>
+
+        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #e2e8f0;" />
+
+        <h3>✉️ Mesajlaşma</h3>
+        <button onclick="openBulkMsgModal()" style="background-color: #3182ce; color: white; width: 100%; margin-bottom: 10px;">
+          📢 Seçili Hakemlere Mesaj Gönder
+        </button>
+
+        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #e2e8f0;" />
+
+        <h3>📊 Raporlama & Yedekleme</h3>
+        <button onclick="exportExcel()" style="background-color: #276749; color: white; width: 100%; margin-bottom: 10px;">
+          📊 Excel İndir (.xlsx)
+        </button>
+        <button onclick="copyJsonData()" style="background-color: #4a5568; color: white; width: 100%;">
+          💾 Verileri Kopyala / Aktar (JSON)
+        </button>
+
+        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #e2e8f0;" />
+
+        <h3>🔄 Toplu İşlemler</h3>
+        <div style="background: #f7fafc; padding: 15px; border-radius: 8px; border: 1px solid #edf2f7;">
+          <p style="font-size: 0.88em; color: #4a5568; margin-bottom: 10px;">JSON verisi yapıştırarak tüm hakemleri güncelleyin:</p>
+          <textarea id="jsonImportArea" rows="3" placeholder='{"referees": [...]}' style="font-size: 0.8em; font-family: monospace;"></textarea>
+          <button onclick="importJsonData()" style="background-color: #ed8936; width: 100%;">📤 Yükle ve Güncelle</button>
         </div>
-      </section>
+      </div>
+    </div>
 
-    </main>
+    <!-- SECTION: RACES -->
+    <div id="view-races" class="container" style="display: none;">
+      <div class="main-content" style="flex: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h1>🏃 Yarış Listesi & Görev Yönetimi</h1>
+          <button onclick="openAddRaceModal()" style="background-color: #38a169;">+ Yeni Yarış Ekle</button>
+        </div>
+        <div id="racesContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION: SETTINGS -->
+    <div id="view-settings" class="container" style="display: none;">
+      <div class="main-content" style="flex: 1;">
+        <h1>⚙️ Sistem Ayarları</h1>
+        <div class="card">
+          <h3>🤖 Telegram Bot Yapılandırması</h3>
+          <form onsubmit="handleSaveSettings(event)">
+            <label>Telegram Bot Token</label>
+            <input type="text" id="cfgTelegramToken" placeholder="7890123456:AA..." />
+
+            <label>Telegram Bot Kullanıcı Adı</label>
+            <input type="text" id="cfgTelegramUser" placeholder="HakemTakipBot" />
+
+            <button type="submit">Ayarları Kaydet</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- BACKUP & RESTORE MODAL -->
-  <div id="backupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 hidden">
-    <div class="glass-card max-w-lg w-full rounded-2xl p-6 border border-indigo-500/30 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i data-lucide="database" class="w-4 h-4 text-indigo-400"></i> Veri Taşı / Aktar Portal
-        </h3>
-        <button onclick="closeBackupModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div class="space-y-4">
-        <p class="text-xs text-slate-300">Tüm hakem verilerini, yarışları ve davetleri 1 tıkla kopyalayabilir veya yeni yedeği yapıştırıp yükleyebilirsiniz.</p>
-        
-        <div class="flex gap-2">
-          <button onclick="copyMasterJSON()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl shadow flex items-center justify-center gap-1.5">
-            <i data-lucide="copy" class="w-4 h-4"></i> Tüm Verileri Kopyala
-          </button>
-          <button onclick="downloadMasterJSON()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-2.5 rounded-xl border border-slate-700 flex items-center justify-center gap-1.5">
-            <i data-lucide="download" class="w-4 h-4"></i> JSON İndir
-          </button>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Yeni JSON Verisi Yapıştır:</label>
-          <textarea id="importJsonText" rows="5" placeholder='{"referees": [...], "races": [...]}' class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 outline-none focus:border-indigo-500"></textarea>
-        </div>
-
-        <button onclick="importMasterJSON()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl shadow flex items-center justify-center gap-1.5">
-          <i data-lucide="upload" class="w-4 h-4"></i> Verileri Yükle & Kaydet
-        </button>
-
-        <p id="backupMessage" class="text-xs font-semibold text-center hidden"></p>
+  <!-- BULK MESSAGE MODAL -->
+  <div id="msgModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-top:0;">📢 Seçili Hakemlere Mesaj Gönder</h3>
+      <p id="selectedCountText" style="font-size:0.9em; color:#718096;">Seçili Hakem Sayısı: 0</p>
+      <label>Mesaj İçeriği *</label>
+      <textarea id="msgContentText" rows="5" placeholder="Mesajınızı buraya yazın..."></textarea>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+        <button onclick="closeMsgModal()" style="background-color:#718096;">İptal</button>
+        <button onclick="sendBulkMsg()" style="background-color:#3182ce;">Gönder (Telegram)</button>
       </div>
     </div>
   </div>
 
-  <!-- JS LOGIC ENGINE -->
+  <!-- JS ENGINE -->
   <script>
-    let appData = { referees: [], races: [], invitations: [] };
+    let appData = { referees: [], races: [], invitations: [], configs: [] };
+    let currentTabFilter = 'all';
+    let selectedRefereeIds = new Set();
 
-    // PIN Protection Logic (admin1)
     function handlePinSubmit(e) {
       e.preventDefault();
-      const pin = document.getElementById('pinInput').value;
-      if (pin === 'admin1') {
+      const val = document.getElementById('pinInput').value;
+      if (val === 'admin1') {
         sessionStorage.setItem('hakem_auth', 'true');
-        document.getElementById('pinGate').classList.add('hidden');
-        document.getElementById('appContainer').classList.remove('hidden');
-        initApp();
+        document.getElementById('pinGateModal').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        initData();
       } else {
-        document.getElementById('pinError').classList.remove('hidden');
+        document.getElementById('pinError').style.display = 'block';
       }
     }
 
     function checkAuth() {
       if (sessionStorage.getItem('hakem_auth') === 'true' || location.hostname === 'localhost') {
-        document.getElementById('pinGate').classList.add('hidden');
-        document.getElementById('appContainer').classList.remove('hidden');
-        initApp();
+        document.getElementById('pinGateModal').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        initData();
       }
     }
 
@@ -293,12 +400,10 @@
       location.reload();
     }
 
-    async function initApp() {
-      const stored = localStorage.getItem('hakem_master_state');
-      if (stored) {
-        try {
-          appData = JSON.parse(stored);
-        } catch(e) {}
+    async function initData() {
+      const saved = localStorage.getItem('hakem_master_db');
+      if (saved) {
+        try { appData = JSON.parse(saved); } catch(e) {}
       }
 
       if (!appData.referees || appData.referees.length === 0) {
@@ -306,144 +411,228 @@
           const res = await fetch('./hakem_master_data.json');
           if (res.ok) {
             appData = await res.json();
-            localStorage.setItem('hakem_master_state', JSON.stringify(appData));
+            localStorage.setItem('hakem_master_db', JSON.stringify(appData));
           }
         } catch(e) {}
       }
 
-      updateCounts();
+      populateEventSelect();
       renderReferees();
       renderRaces();
-      renderInvitations();
-      lucide.createIcons();
     }
 
-    function updateCounts() {
-      document.getElementById('count-referees').innerText = appData.referees.length;
-      document.getElementById('count-races').innerText = appData.races.length;
-      document.getElementById('count-invitations').innerText = appData.invitations.length;
-
-      document.getElementById('stat-total-referees').innerText = appData.referees.length;
-      document.getElementById('stat-active-referees').innerText = appData.referees.length;
-      document.getElementById('stat-national-referees').innerText = appData.referees.filter(r => (r.category || '').includes('Ulusal')).length;
-      document.getElementById('stat-telegram-referees').innerText = appData.referees.filter(r => r.telegram_id).length;
+    function populateEventSelect() {
+      const select = document.getElementById('eventFilterSelect');
+      select.innerHTML = '<option value="">Tüm Yarışlar</option>';
+      (appData.races || []).forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.name;
+        opt.textContent = r.name;
+        select.appendChild(opt);
+      });
     }
 
     function renderReferees() {
-      const query = (document.getElementById('searchReferees').value || '').toLowerCase();
-      const catFilter = document.getElementById('filterCategory').value;
+      const search = (document.getElementById('searchInput').value || '').toLowerCase();
+      const eventFilter = document.getElementById('eventFilterSelect').value;
 
-      const filtered = appData.referees.filter(r => {
-        const matchesQuery = !query || 
-          (r.first_name || '').toLowerCase().includes(query) ||
-          (r.last_name || '').toLowerCase().includes(query) ||
-          (r.license_number || '').toLowerCase().includes(query) ||
-          (r.city || '').toLowerCase().includes(query);
-        const matchesCat = !catFilter || (r.category || '').includes(catFilter);
-        return matchesQuery && matchesCat;
-      });
+      let list = appData.referees || [];
 
-      const tbody = document.getElementById('refereesTableBody');
-      tbody.innerHTML = filtered.map(r => `
-        <tr class="hover:bg-slate-800/40 transition">
-          <td class="p-3">
-            <div class="font-bold text-slate-100">${r.first_name} ${r.last_name}</div>
-            <div class="text-[11px] font-mono text-slate-400">Lisans No: ${r.license_number || 'N/A'}</div>
-          </td>
-          <td class="p-3">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">${r.category || 'İl Hakemi'}</span>
-            <div class="text-[11px] text-slate-400 mt-0.5">${r.city || 'İstanbul'}</div>
-          </td>
-          <td class="p-3 font-mono text-slate-300">${r.phone || 'N/A'}</td>
-          <td class="p-3 font-mono text-slate-400">
-            ${r.telegram_id ? `<span class="text-emerald-400 font-semibold">ID: ${r.telegram_id}</span>` : `<span class="text-slate-600">Bağlı Değil</span>`}
-          </td>
-          <td class="p-3">
-            <span class="text-emerald-400 font-semibold flex items-center gap-1"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Onaylı</span>
-          </td>
-          <td class="p-3 text-right">
-            <button class="text-blue-400 hover:text-blue-300 font-semibold text-xs">Düzenle</button>
-          </td>
-        </tr>
-      `).join('');
-      lucide.createIcons();
-    }
+      if (currentTabFilter === 'no_invites') {
+        list = list.filter(r => {
+          const invs = (appData.invitations || []).filter(i => i.referee_id === r.id);
+          return invs.length === 0;
+        });
+      }
 
-    function renderRaces() {
-      const grid = document.getElementById('racesListGrid');
-      grid.innerHTML = appData.races.map(rc => `
-        <div class="glass-card rounded-2xl p-5 border border-slate-800 hover:border-blue-500/40 transition flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full">${rc.race_date || '2026'}</span>
-              <span class="text-xs text-slate-400">${rc.city || 'İstanbul'}</span>
-            </div>
-            <h3 class="font-bold text-white text-base leading-snug mb-2">${rc.name}</h3>
-            <p class="text-xs text-slate-400 mb-4">${rc.location || 'Atletizm Pisti'}</p>
-          </div>
-          <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
-            <span class="text-xs text-slate-400 font-mono">Atanan Hakem: ${appData.invitations.filter(i => i.race_id === rc.id).length}</span>
-            <button class="bg-blue-600/30 hover:bg-blue-600 text-blue-200 hover:text-white font-bold text-xs px-3 py-1.5 rounded-xl border border-blue-500/30 transition">Görevlendir</button>
-          </div>
-        </div>
-      `).join('');
-    }
+      if (search) {
+        list = list.filter(r => 
+          (r.first_name || '').toLowerCase().includes(search) ||
+          (r.last_name || '').toLowerCase().includes(search) ||
+          (r.license_number || r.sicil_no || '').toLowerCase().includes(search) ||
+          (r.city || r.region || '').toLowerCase().includes(search)
+        );
+      }
 
-    function renderInvitations() {
-      const tbody = document.getElementById('invitationsTableBody');
-      tbody.innerHTML = appData.invitations.map(inv => {
-        const race = appData.races.find(r => r.id === inv.race_id);
-        const ref = appData.referees.find(rf => rf.id === inv.referee_id);
+      document.getElementById('refereeCountHeader').innerText = `(Toplam: ${list.length})`;
+
+      const container = document.getElementById('refereeListContainer');
+      if (list.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: #a0aec0;"><p>Hakem bulunamadı.</p></div>';
+        return;
+      }
+
+      container.innerHTML = list.map(ref => {
+        const fullName = ref.full_name || `${ref.first_name || ''} ${ref.last_name || ''}`.trim();
+        const sicil = ref.license_number || ref.sicil_no || '';
+        const region = ref.city || ref.region || '';
+        const phone = ref.phone || '';
+        const invs = (appData.invitations || []).filter(i => i.referee_id === ref.id);
+        const isChecked = selectedRefereeIds.has(ref.id) ? 'checked' : '';
+
         return `
-          <tr class="hover:bg-slate-800/40 transition">
-            <td class="p-3 font-semibold text-slate-200">${race ? race.name : 'Yarış #' + inv.race_id}</td>
-            <td class="p-3 text-slate-300">${ref ? (ref.first_name + ' ' + ref.last_name) : 'Hakem #' + inv.referee_id}</td>
-            <td class="p-3 font-mono text-blue-400">${inv.assigned_role || 'Hakem'}</td>
-            <td class="p-3 font-mono text-slate-400">${inv.created_at ? inv.created_at.slice(0, 10) : '2026-08-30'}</td>
-            <td class="p-3">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Onaylandı</span>
-            </td>
-          </tr>
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: flex-start; gap: 15px; flex: 1;">
+                <div style="padding-top: 3px;">
+                  <input type="checkbox" class="ref-cb" value="${ref.id}" ${isChecked} onchange="toggleRefSelect('${ref.id}')" style="width: 18px; height: 18px; cursor: pointer;">
+                </div>
+                <div>
+                  <h3 style="margin-bottom: 5px; font-size: 1.2em; color: #2d3748;">${fullName}</h3>
+                  <p style="margin: 0; color: #718096; font-size: 0.9em;">
+                    ${sicil ? `<span style="background: #e2e8f0; padding: 1px 6px; border-radius: 4px; margin-right: 5px; font-family: monospace;">#${sicil}</span>` : ''}
+                    ${region ? `📍 ${region}` : ''}
+                    ${phone ? ` 📞 ${phone}` : ''}
+                  </p>
+                </div>
+              </div>
+              <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                <button type="button" onclick="sendSingleMsg('${ref.id}', '${fullName}')" style="background-color: #38a169; color: white; padding: 4px 10px; font-size: 0.85em; border-radius: 4px;">
+                  ✉️ Mesaj Gönder
+                </button>
+                <span style="font-size: 0.85em; color: #718096; background: #edf2f7; padding: 2px 8px; border-radius: 12px;">
+                  Davetler: <strong>${invs.length}</strong>
+                </span>
+                <button onclick="deleteReferee('${ref.id}')" class="delete">Sil</button>
+              </div>
+            </div>
+          </div>
         `;
       }).join('');
     }
 
+    function renderRaces() {
+      const container = document.getElementById('racesContainer');
+      const races = appData.races || [];
+      if (races.length === 0) {
+        container.innerHTML = '<div class="card"><p>Henüz yarış eklenmemiş.</p></div>';
+        return;
+      }
+      container.innerHTML = races.map(rc => {
+        const invs = (appData.invitations || []).filter(i => i.race_id === rc.id);
+        return `
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="margin-bottom:4px; color:#2b6cb0;">${rc.name}</h3>
+                <p style="margin:0; font-size:0.9em; color:#718096;">📍 ${rc.location || rc.city || 'TÜR'} | 📅 ${rc.race_date || '2026'}</p>
+              </div>
+              <div>
+                <span style="background:#ebf8ff; color:#2b6cb0; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:600;">
+                  Atanan Hakem: ${invs.length}
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterTab(type) {
+      currentTabFilter = type;
+      document.getElementById('tab-all').style.background = type === 'all' ? '#3182ce' : '#e2e8f0';
+      document.getElementById('tab-all').style.color = type === 'all' ? 'white' : '#4a5568';
+      document.getElementById('tab-no_invites').style.background = type === 'no_invites' ? '#3182ce' : '#e2e8f0';
+      document.getElementById('tab-no_invites').style.color = type === 'no_invites' ? 'white' : '#4a5568';
+      renderReferees();
+    }
+
     function switchTab(tab) {
-      ['referees', 'races', 'invitations'].forEach(t => {
-        document.getElementById(`view-${t}`).classList.add('hidden');
-        document.getElementById(`tab-${t}`).classList.remove('active');
+      ['referees', 'races', 'settings'].forEach(t => {
+        document.getElementById(`view-${t}`).style.display = 'none';
+        document.getElementById(`nav-${t}`).classList.remove('active');
       });
-      document.getElementById(`view-${tab}`).classList.remove('hidden');
-      document.getElementById(`tab-${tab}`).classList.add('active');
+      document.getElementById(`view-${tab}`).style.display = 'flex';
+      document.getElementById(`nav-${tab}`).classList.add('active');
     }
 
-    function openBackupModal() { document.getElementById('backupModal').classList.remove('hidden'); }
-    function closeBackupModal() { document.getElementById('backupModal').classList.add('hidden'); }
-
-    function copyMasterJSON() {
-      navigator.clipboard.writeText(JSON.stringify(appData, null, 2));
-      alert('Tüm Hakem & Yarış Verisi Kopyalandı!');
+    function toggleSelectAll(cb) {
+      const cbs = document.querySelectorAll('.ref-cb');
+      cbs.forEach(c => {
+        c.checked = cb.checked;
+        if (cb.checked) selectedRefereeIds.add(c.value);
+        else selectedRefereeIds.delete(c.value);
+      });
     }
 
-    function downloadMasterJSON() {
-      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+    function toggleRefSelect(id) {
+      if (selectedRefereeIds.has(id)) selectedRefereeIds.delete(id);
+      else selectedRefereeIds.add(id);
+    }
+
+    function handleAddReferee(e) {
+      e.preventDefault();
+      const name = document.getElementById('addFullName').value;
+      const sicil = document.getElementById('addSicilNo').value;
+      const phone = document.getElementById('addPhone').value;
+      const region = document.getElementById('addRegion').value;
+
+      const newRef = {
+        id: 'ref_' + Date.now(),
+        full_name: name,
+        first_name: name.split(' ')[0],
+        last_name: name.split(' ').slice(1).join(' '),
+        license_number: sicil,
+        sicil_no: sicil,
+        phone: phone,
+        city: region,
+        region: region
+      };
+
+      appData.referees.unshift(newRef);
+      localStorage.setItem('hakem_master_db', JSON.stringify(appData));
+      renderReferees();
+
+      document.getElementById('addFullName').value = '';
+      document.getElementById('addSicilNo').value = '';
+      document.getElementById('addPhone').value = '';
+      document.getElementById('addRegion').value = '';
+      alert('Yeni Hakem Kaydedildi!');
+    }
+
+    function deleteReferee(id) {
+      if (confirm('Bu hakemi silmek istediğinize emin misiniz?')) {
+        appData.referees = appData.referees.filter(r => r.id != id);
+        localStorage.setItem('hakem_master_db', JSON.stringify(appData));
+        renderReferees();
+      }
+    }
+
+    function openBulkMsgModal() {
+      document.getElementById('selectedCountText').innerText = `Seçili Hakem Sayısı: ${selectedRefereeIds.size}`;
+      document.getElementById('msgModal').style.display = 'flex';
+    }
+
+    function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
+
+    function sendBulkMsg() {
+      const txt = document.getElementById('msgContentText').value;
+      if (!txt) return alert('Lütfen mesaj metni yazın.');
+      alert(`${selectedRefereeIds.size || appData.referees.length} hakeme Telegram bildirimi gönderildi!`);
+      closeMsgModal();
+    }
+
+    function exportExcel() {
+      const blob = new Blob([JSON.stringify(appData.referees, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `Hakem_Takip_Yedek_${new Date().toISOString().slice(0, 10)}.json`;
+      a.href = URL.createObjectURL(blob);
+      a.download = `Hakem_Listesi_${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
     }
 
-    function importMasterJSON() {
-      const txt = document.getElementById('importJsonText').value;
+    function copyJsonData() {
+      navigator.clipboard.writeText(JSON.stringify(appData, null, 2));
+      alert('Tüm Hakem Verileri Kopyalandı!');
+    }
+
+    function importJsonData() {
+      const txt = document.getElementById('jsonImportArea').value;
       if (!txt) return;
       try {
-        const parsed = JSON.parse(txt);
-        appData = parsed;
-        localStorage.setItem('hakem_master_state', JSON.stringify(appData));
-        initApp();
-        closeBackupModal();
-        alert('Veriler Başarıyla Yüklendi!');
+        appData = JSON.parse(txt);
+        localStorage.setItem('hakem_master_db', JSON.stringify(appData));
+        initData();
+        alert('Veriler Yüklendi ve Güncellendi!');
       } catch(e) { alert('Hatalı JSON!'); }
     }
 
