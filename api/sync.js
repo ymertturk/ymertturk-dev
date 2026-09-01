@@ -33,21 +33,28 @@ export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
 
-  if (req.method === 'OPTIONS') {
+  const method = (req.method || '').toUpperCase();
+
+  if (method === 'OPTIONS') {
     return res.status(200).end();
   }
 
   const appId = req.query.appId || 'tedarikci';
   let memoryStore = loadMemoryStore();
 
-  if (req.method === 'DELETE') {
+  if (method === 'DELETE') {
     delete memoryStore[appId];
     saveMemoryStore(memoryStore);
     return res.status(200).json({ success: true, message: 'Cloud data cleared for ' + appId });
   }
 
-  if (req.method === 'POST') {
+  if (method === 'POST') {
     const payload = req.body;
+    if (payload && payload.clear) {
+      delete memoryStore[appId];
+      saveMemoryStore(memoryStore);
+      return res.status(200).json({ success: true, message: 'Cloud data cleared for ' + appId });
+    }
     if (payload && payload.data) {
       memoryStore[appId] = {
         data: payload.data,
@@ -59,7 +66,7 @@ export default function handler(req, res) {
     return res.status(400).json({ error: 'Invalid payload' });
   }
 
-  if (req.method === 'GET') {
+  if (method === 'GET') {
     const record = memoryStore[appId] || null;
     return res.status(200).json({
       appId,
