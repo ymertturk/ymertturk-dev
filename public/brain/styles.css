@@ -781,6 +781,8 @@ body {
     display: block;
 }
 
+.mobile-only { display: none !important; }
+
 /* ==========================================================================
    📱 NATIVE MOBILE APP STYLES (Smartphones < 768px)
    ========================================================================== */
@@ -792,6 +794,11 @@ body {
 
     .mobile-only { display: flex !important; }
     .desktop-only { display: none !important; }
+
+    .workspace {
+        height: calc(100dvh - 120px);
+        overflow: hidden;
+    }
 
     .app-header {
         padding: 0 14px;

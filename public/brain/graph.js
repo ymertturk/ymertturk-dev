@@ -360,6 +360,31 @@ class BrainGraphEngine {
         this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
         this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
         this.canvas.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
+
+        // Native Mobile Touch Events
+        this.canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                this.handleMouseDown({
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+            }
+        }, { passive: true });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                this.handleMouseMove({
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+            }
+        }, { passive: true });
+
+        this.canvas.addEventListener('touchend', (e) => {
+            this.handleMouseUp(e);
+        }, { passive: true });
     }
 
     getCanvasPos(e) {
