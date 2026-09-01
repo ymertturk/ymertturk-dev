@@ -1,11 +1,16 @@
 {
   "rewrites": [
-    { "source": "/brain/(.*)", "destination": "/brain/index.html" },
-    { "source": "/fba-tracker/(.*)", "destination": "/fba-tracker/index.html" },
-    { "source": "/tedarik/(.*)", "destination": "/tedarik/index.html" },
-    { "source": "/hakem-takip/(.*)", "destination": "/hakem-takip/index.html" },
-    { "source": "/wa-calculator/(.*)", "destination": "/wa-calculator/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/brain", "destination": "/brain/index.html" },
+    { "source": "/brain/:path*", "destination": "/brain/index.html" },
+    { "source": "/fba-tracker", "destination": "/fba-tracker/index.html" },
+    { "source": "/fba-tracker/:path*", "destination": "/fba-tracker/index.html" },
+    { "source": "/tedarik", "destination": "/tedarik/index.html" },
+    { "source": "/tedarik/:path*", "destination": "/tedarik/index.html" },
+    { "source": "/hakem-takip", "destination": "/hakem-takip/index.html" },
+    { "source": "/hakem-takip/:path*", "destination": "/hakem-takip/index.html" },
+    { "source": "/wa-calculator", "destination": "/wa-calculator/index.html" },
+    { "source": "/wa-calculator/:path*", "destination": "/wa-calculator/index.html" },
+    { "source": "/:path*", "destination": "/index.html" }
   ],
   "headers": [
     {
