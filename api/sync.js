@@ -56,11 +56,12 @@ export default function handler(req, res) {
       } catch (e) {}
     }
 
-    if (payload && payload.shortcutNote) {
+    const incomingNote = payload ? (payload.shortcutNote || (payload.text || payload.content ? payload : null)) : null;
+    if (incomingNote) {
       if (!Array.isArray(memoryStore['mindnexus_shortcut_inbox'])) {
         memoryStore['mindnexus_shortcut_inbox'] = [];
       }
-      memoryStore['mindnexus_shortcut_inbox'].push(payload.shortcutNote);
+      memoryStore['mindnexus_shortcut_inbox'].push(incomingNote);
       saveMemoryStore(memoryStore);
       return res.status(200).json({ success: true, message: 'Note added to MindNexus Inbox via Apple Shortcut!' });
     }
