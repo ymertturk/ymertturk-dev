@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="justify-content: center; margin-top: 50px;">
+    <div class="card" style="width: 100%; max-width: 400px;">
+        <h1 style="text-align: center; margin-bottom: 20px;">Giriş Yap</h1>
+
+        {% if error %}
+        <div class="alert"
+            style="background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; padding: 10px; border-radius: 6px; margin-bottom: 20px;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/login" method="post">
+            <label>Kullanıcı Adı</label>
+            <input type="text" name="username" required autofocus>
+
+            <label>Şifre</label>
+            <input type="password" name="password" required>
+
+            <button type="submit" style="width: 100%; margin-top: 10px;">Giriş Yap</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Google Form Yanıtlarını İşle</h1>
+
+{% if error %}
+<div class="alert" style="background-color: #fff5f5; border-color: #feb2b2; color: #c53030;">
+    <h3>⚠️ Hata</h3>
+    <p>{{ error }}</p>
+</div>
+{% endif %}
+
+{% if result %}
+<div class="alert">
+    <h3>İşlem Sonucu</h3>
+    <p>✅ Güncellenen: <strong>{{ result.updated }}</strong></p>
+    <p>⚠️ Bulunamayan Hakem: <strong>{{ result.not_found }}</strong></p>
+    <p>ℹ️ Daveti Olmayan: <strong>{{ result.no_invitation }}</strong></p>
+    {% if result.details %}
+    <ul style="margin-top: 10px; color: #718096; font-size: 0.9em;">
+        {% for msg in result.details %}
+        <li>{{ msg }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="container">
+    <div class="card" style="flex: 1;">
+        <h3>Adım 1: Yarış Tarihini Seçin</h3>
+        <form action="/invitations/bulk-update" method="post">
+            <div style="margin-bottom: 15px;">
+                <label>Hangi tarihteki davetler güncellenecek?</label>
+                <input type="date" name="event_date" required style="font-size: 1.1em;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label>Yarış İsmi (Opsiyonel)</label>
+                <input type="text" name="event_name" placeholder="Örn: 2024 İstanbul Maratonu"
+                    style="font-size: 1.1em;">
+                <small style="color: #718096;">Bu ismi girerseniz, davetlere yarış adı olarak kaydedilir.</small>
+            </div>
+
+            <h3 style="margin-top: 20px;">Adım 2: Google Sheet'ten Yapıştırın</h3>
+            <p style="color: #718096; font-size: 0.9em;">
+                Google Sheet tablonuzdaki <strong>"Adı Soyadı"</strong> ve <strong>"Görev Kabul Edildi Mi?"</strong>
+                sütunlarını yan yana seçip kopyalayın ve buraya yapıştırın.
+            </p>
+
+            <div
+                style="margin-bottom: 20px; padding: 15px; background: #f7fafc; border-radius: 8px; border: 1px solid #cbd5e0;">
+                <label style="font-weight: bold; color: #2b6cb0;">Seçenek A: Google Sheet Linki (Önerilen)</label>
+                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    <input type="text" name="drive_url" placeholder="https://docs.google.com/spreadsheets/d/..."
+                        style="flex: 1;">
+                </div>
+                <small style="color: #718096; display: block; margin-top: 5px;">
+                    Google Sheet dosyanızın "Paylaş" ayarlarından "Bağlantıya sahip olan herkes görüntüleyen olabilir"
+                    seçeneğini açmalısınız.
+                </small>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="font-weight: bold; color: #2d3748;">Seçenek B: Verileri Yapıştır</label>
+            </div>
+
+            <textarea name="paste_data" rows="10"
+                placeholder="Ahmet Yılmaz	KABUL EDİYORUM&#10;Ayşe Demir	MAZERETLİYİM, KABUL EDEMİYORUM"
+                style="font-family: monospace;"></textarea>
+
+            <button type="submit" style="margin-top: 10px; padding: 15px; font-size: 1.1em;">Durumları Güncelle</button>
+        </form>
+    </div>
+
+    <div class="sidebar">
+        <h3>Nasıl Çalışır?</h3>
+        <ol style="padding-left: 20px; color: #4a5568;">
+            <li>Google Form yanıtlarının olduğu tabloyu açın.</li>
+            <li>İsim ve Cevap sütunlarını seçip kopyalayın (Ctrl+C).</li>
+            <li>Buradaki kutuya yapıştırın (Ctrl+V).</li>
+            <li>Program otomatik olarak:
+                <ul>
+                    <li>İsimleri eşleştirir.</li>
+                    <li>"KABUL" içerenleri ✅ yapar.</li>
+                    <li>"MAZERET" içerenleri ❌ yapar.</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

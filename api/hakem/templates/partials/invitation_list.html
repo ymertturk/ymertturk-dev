@@ -1,0 +1,29 @@
+{% if message %}
+<div style="padding: 10px; margin-bottom: 10px; border-radius: 6px; font-weight: 500; font-size: 0.9em;
+    {% if message.type == 'success' %} background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+    {% else %} background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; {% endif %}">
+    {{ message.text }}
+</div>
+{% endif %}
+{% if invitations %}
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table>
+        <thead>
+            <tr>
+                <th>Tarih</th>
+                <th>Etkinlik</th>
+                <th>Durum</th>
+                <th>Notlar</th>
+                <th style="width: 50px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inv in invitations %}
+            {% include "partials/invitation_row.html" %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p style="color: #718096; font-style: italic;">Henüz davet gönderilmemiş.</p>
+{% endif %}

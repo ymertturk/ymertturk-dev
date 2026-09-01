@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>Hakem Listesi <small
+                    style="font-size: 0.6em; color: #718096; font-weight: normal; white-space: nowrap;">(Toplam: {{
+                    pagination.total_count }})</small></h1>
+            <div style="display: flex; gap: 10px;">
+                <a href="/?tab=all" class="tab-button {% if not tab or tab == 'all' %}active{% endif %}"
+                    style="text-decoration: none; padding: 8px 16px; border-radius: 6px; background: {% if not tab or tab == 'all' %}#3182ce{% else %}#e2e8f0{% endif %}; color: {% if not tab or tab == 'all' %}white{% else %}#4a5568{% endif %}; font-weight: 500;">Tüm
+                    Hakemler</a>
+                <a href="/?tab=no_invites" class="tab-button {% if tab == 'no_invites' %}active{% endif %}"
+                    style="text-decoration: none; padding: 8px 16px; border-radius: 6px; background: {% if tab == 'no_invites' %}#3182ce{% else %}#e2e8f0{% endif %}; color: {% if tab == 'no_invites' %}white{% else %}#4a5568{% endif %}; font-weight: 500;">Hiç
+                    Davet Almayanlar</a>
+            </div>
+        </div>
+
+        <form action="/" method="get" style="display: flex; gap: 10px; margin-bottom: 25px;">
+            <input type="hidden" name="tab" value="{{ tab or 'all' }}">
+            <div class="card">
+                <div style="display: flex; gap: 15px; margin-bottom: 0;">
+                    <input type="text" name="search" placeholder="Hakem ara..." value="{{ search or '' }}" hx-get="/"
+                        hx-trigger="input changed delay:300ms, search" hx-target="#referee-list" hx-push-url="true"
+                        hx-include="[name='event_filter'],[name='tab']" style="margin-bottom: 0; flex: 2;">
+
+                    <select name="event_filter" hx-get="/" hx-target="#referee-list"
+                        hx-include="[name='search'],[name='tab']" hx-push-url="true" style="margin-bottom: 0; flex: 1;">
+                        <option value="">Tüm Yarışlar</option>
+                        {% for event in event_names %}
+                        <option value="{{ event }}" {% if event_filter==event %}selected{% endif %}>{{ event }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <div id="referee-list">
+            {% include "partials/referee_list.html" %}
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h3>➕ Yeni Hakem Ekle</h3>
+        <form id="add-referee-form" hx-post="/referees" hx-target="#referee-list" hx-swap="innerHTML">
+            <label>Ad Soyad *</label>
+            <input type="text" name="full_name" required minlength="2" placeholder="Örn: Ahmet Yılmaz">
+
+            <label>Sicil No</label>
+            <input type="text" name="sicil_no" placeholder="Örn: 12345">
+
+            <label>Telefon</label>
+            <input type="text" name="phone" placeholder="Örn: 0555 123 45 67">
+
+            <label>Bölge / İl</label>
+            <input type="text" name="region" placeholder="Örn: İstanbul">
+
+            <button type="submit">Kaydet</button>
+        </form>
+
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+        <h3>✉️ Mesajlaşma</h3>
+        <button id="bulkMsgBtn" onclick="openBulkMessageModal()" style="background-color: #3182ce; color: white; width: 100%; margin-bottom: 10px;">
+            📢 Seçili Hakemlere Mesaj Gönder
+        </button>
+
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+        <h3>📊 Raporlama</h3>
+        <button onclick="openExportModal()" style="background-color: #276749; color: white;">Excel İndir
+            (.xlsx)</button>
+
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+        <h3>🔄 Toplu İşlemler</h3>
+        <div style="background: #f7fafc; padding: 15px; border-radius: 8px; border: 1px solid #edf2f7;">
+            <p style="font-size: 0.9em; color: #4a5568; margin-bottom: 10px;">Excel ile toplu hakem ekleyebilir veya
+                mevcut bilgileri güncelleyebilirsiniz.</p>
+
+            <a href="/referees/template/download"
+                style="display: block; text-decoration: none; text-align: center; background-color: #718096; color: white; padding: 8px; border-radius: 4px; margin-bottom: 15px; font-size: 0.9em;">
+                📥 Taslak Şablonu İndir
+            </a>
+
+            <form action="/referees/import" method="post" enctype="multipart/form-data">
+                <label style="display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 600;">Excel Yükle
+                    (.xlsx)</label>
+                <input type="file" name="file" accept=".xlsx" required
+                    style="width: 100%; margin-bottom: 10px; font-size: 0.9em;">
+                <button type="submit" style="background-color: #ed8936; width: 100%;">📤 Yükle ve Güncelle</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Telegram Message Modal -->
+<div id="telegramMessageModal" class="modal" style="display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background-color: #fefefe; margin: 10% auto; padding: 25px; border: 1px solid #888; width: 50%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-width: 600px;">
+        <span class="close" onclick="closeTelegramModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        <h2 id="telegramModalTitle" style="margin-top: 0; color: #2d3748;">Telegram Mesajı Gönder</h2>
+        <p id="telegramModalDesc" style="color: #718096; font-size: 0.95em; margin-bottom: 20px;">Seçili hakemlere Telegram üzerinden mesaj gönderin.</p>
+        
+        <form id="telegramMessageForm" hx-post="/referees/message/bulk" hx-encoding="multipart/form-data" hx-target="#telegramMessageResult">
+            <div id="refereeInputsContainer"></div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 5px;">Dosya Ekle (İsteğe Bağlı)</label>
+                <input type="file" name="file" style="padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; width: 100%; background: white; box-sizing: border-box;">
+            </div>
+
+            <textarea name="message" rows="5" required style="width: 100%; padding: 15px; border: 2px solid #bee3f8; border-radius: 10px; font-family: inherit; font-size: 1em; margin-bottom: 15px; outline: none; transition: border-color 0.2s; box-sizing: border-box;" placeholder="Mesajınızı buraya yazın..."></textarea>
+
+            <div style="text-align: right;">
+                <button type="submit" style="background-color: #38a169; color: white; padding: 10px 20px; font-size: 1em; border-radius: 8px; font-weight: 600;">
+                    ✈ Gönder
+                </button>
+            </div>
+        </form>
+        <div id="telegramMessageResult" style="margin-top: 15px;"></div>
+    </div>
+</div>
+
+<script>
+window.selectedReferees = window.selectedReferees || new Set();
+
+function updateSelectedCountUI() {
+    var countBtn = document.getElementById('bulkMsgBtn');
+    if (countBtn) {
+        if (window.selectedReferees.size > 0) {
+            countBtn.innerText = "📢 Seçili Hakemlere Mesaj Gönder (" + window.selectedReferees.size + " Seçili)";
+        } else {
+            countBtn.innerText = "📢 Seçili Hakemlere Mesaj Gönder";
+        }
+    }
+}
+
+function toggleRefereeSelection(cb) {
+    if (cb.checked) {
+        window.selectedReferees.add(cb.value);
+    } else {
+        window.selectedReferees.delete(cb.value);
+    }
+    updateSelectedCountUI();
+}
+
+function openTelegramModal(refereeId, refereeName) {
+    document.getElementById('telegramModalTitle').innerText = refereeName + " - Mesaj Gönder";
+    document.getElementById('telegramModalDesc').innerText = "Bu hakeme özel Telegram mesajı gönderin.";
+    
+    var container = document.getElementById('refereeInputsContainer');
+    container.innerHTML = '<input type="hidden" name="referee_ids" value="' + refereeId + '">';
+    
+    document.getElementById('telegramMessageResult').innerHTML = '';
+    document.getElementById('telegramMessageModal').style.display = "block";
+}
+
+function openBulkMessageModal() {
+    if (window.selectedReferees.size === 0) {
+        alert("Lütfen listeden en az bir hakem seçin.");
+        return;
+    }
+    
+    document.getElementById('telegramModalTitle').innerText = "Toplu Mesaj Gönder";
+    document.getElementById('telegramModalDesc').innerText = window.selectedReferees.size + " hakeme Telegram mesajı gönderiyorsunuz.";
+    
+    var container = document.getElementById('refereeInputsContainer');
+    container.innerHTML = '';
+    window.selectedReferees.forEach(function(refId) {
+        container.innerHTML += '<input type="hidden" name="referee_ids" value="' + refId + '">';
+    });
+    
+    document.getElementById('telegramMessageResult').innerHTML = '';
+    document.getElementById('telegramMessageModal').style.display = "block";
+}
+
+function closeTelegramModal() {
+    document.getElementById('telegramMessageModal').style.display = "none";
+}
+
+// Select all functionality for bulk actions
+function toggleAllReferees(source) {
+    var checkboxes = document.querySelectorAll('.referee-checkbox');
+    checkboxes.forEach(function(cb) {
+        cb.checked = source.checked;
+        if (source.checked) {
+            window.selectedReferees.add(cb.value);
+        } else {
+            window.selectedReferees.delete(cb.value);
+        }
+    });
+    updateSelectedCountUI();
+}
+
+// Preserve checkbox state after HTMX DOM replacement
+document.body.addEventListener('htmx:afterSettle', function(evt) {
+    var checkboxes = document.querySelectorAll('.referee-checkbox');
+    if (checkboxes.length > 0) {
+        var allChecked = true;
+        var hasVisible = false;
+        
+        checkboxes.forEach(function(cb) {
+            hasVisible = true;
+            if (window.selectedReferees.has(cb.value)) {
+                cb.checked = true;
+            } else {
+                allChecked = false;
+            }
+        });
+        
+        var selectAllCb = document.getElementById('selectAllCb');
+        if (selectAllCb) {
+            selectAllCb.checked = hasVisible && allChecked;
+        }
+        updateSelectedCountUI();
+    }
+});
+
+// Initial call to set UI state
+updateSelectedCountUI();
+</script>
+
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h1>⚙️ Sistem Ayarları</h1>
+    <p class="text-muted">Bu ayarlar sadece yönetici tarafından değiştirilebilir.</p>
+
+    {% if message %}
+    <div
+        style="padding: 10px; background-color: #f0fff4; color: #22543d; border: 1px solid #c6f6d5; border-radius: 8px; margin-bottom: 20px;">
+        {{ message }}
+    </div>
+    {% endif %}
+
+    <!-- 1. Telegram Settings Form -->
+    <form action="/admin/settings" method="post">
+        <h2>Telegram Entegrasyonu</h2>
+
+        <div style="margin-bottom: 20px;">
+            <label for="telegram_bot_token">Bot Token</label>
+            <input type="text" id="telegram_bot_token" name="telegram_bot_token"
+                value="{{ config.TELEGRAM_BOT_TOKEN or '' }}" placeholder="123456:ABC-DEF...">
+            <small style="color: #718096; display: block; margin-top: -15px; margin-bottom: 15px;">
+                @BotFather'dan aldığınız token.
+            </small>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="telegram_bot_username">Bot Kullanıcı Adı</label>
+            <input type="text" id="telegram_bot_username" name="telegram_bot_username"
+                value="{{ config.TELEGRAM_BOT_USERNAME or '' }}" placeholder="HakemBot">
+            <small style="color: #718096; display: block; margin-top: -15px; margin-bottom: 15px;">
+                @ işareti olmadan yazınız.
+            </small>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="admin_telegram_chat_id">Yönetici Chat IDleri (Virgülle ayırarak birden fazla
+                girebilirsiniz)</label>
+            <input type="text" id="admin_telegram_chat_id" name="admin_telegram_chat_id"
+                value="{{ config.ADMIN_TELEGRAM_CHAT_ID or '' }}" placeholder="123456789, 987654321">
+            <small style="color: #718096; display: block; margin-top: -15px; margin-bottom: 15px;">
+                Hakemlerin kabul/ret bildirimleri bu kişilere gider. Birden fazla kişi için aralarına virgül
+                koyunuz.<br>
+                <strong>Nasıl Öğrenilir?</strong> Telegram'da <a href="https://t.me/userinfobot"
+                    target="_blank">@userinfobot</a> başlatın, size ID'nizi verecektir.
+            </small>
+        </div>
+
+        <button type="submit" class="button">💾 Ayarları Kaydet</button>
+    </form>
+
+    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+    <!-- 2. User Management -->
+    <h2>👥 Kullanıcı Yönetimi</h2>
+
+    <div style="margin-bottom: 20px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #edf2f7;">
+                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Kullanıcı Adı</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Rol</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 2px solid #e2e8f0;">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users_list %}
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">{{ u.username }}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">
+                        <span
+                            class="status-badge {% if u.role == 'admin' %}status-ACCEPTED{% else %}status-TIMED_OUT{% endif %}">
+                            {{ u.role }}
+                        </span>
+                    </td>
+                    <td
+                        style="padding: 10px; text-align: right; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 5px;">
+                        <button type="button" onclick="openResetPasswordModal('{{ u.id }}', '{{ u.username }}')"
+                            style="background-color: #ecc94b; color: #744210; padding: 5px 10px; font-size: 0.8em;">🔑</button>
+
+                        {% if u.id != user.id %}
+                        <!-- Standalone form for delete -->
+                        <form action="/admin/users/{{ u.id }}/delete" method="post"
+                            onsubmit="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?');"
+                            style="margin: 0;">
+                            <button type="submit"
+                                style="background-color: #e53e3e; padding: 5px 10px; font-size: 0.8em;"
+                                class="danger-btn">🗑️</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add User Form -->
+    <div
+        style="background: #f7fafc; padding: 15px; border-radius: 8px; border: 1px solid #edf2f7; margin-bottom: 20px;">
+        <h4 style="margin-top: 0;">➕ Yeni Kullanıcı Ekle</h4>
+        <form action="/admin/users/add" method="post"
+            style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
+            <div style="flex: 1;">
+                <label style="margin-bottom: 2px; font-size: 0.8em;">Kullanıcı Adı</label>
+                <input type="text" name="username" required placeholder="kullanici123" style="margin-bottom: 0;">
+            </div>
+            <div style="flex: 1;">
+                <label style="margin-bottom: 2px; font-size: 0.8em;">Şifre</label>
+                <input type="text" name="password" required placeholder="******" style="margin-bottom: 0;">
+            </div>
+            <div style="width: 100px;">
+                <label style="margin-bottom: 2px; font-size: 0.8em;">Rol</label>
+                <select name="role" style="margin-bottom: 0;">
+                    <option value="user">Kullanıcı</option>
+                    <option value="admin">Yönetici</option>
+                </select>
+            </div>
+            <button type="submit" style="background-color: #38a169;">Ekle</button>
+        </form>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <dialog id="admin-reset-pwd-modal"
+        style="border: none; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h3>Şifre Sıfırla: <span id="reset-target-user"></span></h3>
+        <form id="admin-reset-form" method="post">
+            <input type="text" name="new_password" placeholder="Yeni Şifre" required>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="document.getElementById('admin-reset-pwd-modal').close()"
+                    style="background: #cbd5e0; color: #4a5568;">İptal</button>
+                <button type="submit" style="background: #3182ce;">Güncelle</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script>
+        function openResetPasswordModal(userId, username) {
+            document.getElementById('reset-target-user').textContent = username;
+            document.getElementById('admin-reset-form').action = '/admin/users/' + userId + '/password';
+            document.getElementById('admin-reset-pwd-modal').showModal();
+        }
+    </script>
+
+    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+    <!-- 3. DB Import Form -->
+    <form action="/admin/db/import" method="post" enctype="multipart/form-data">
+        <h2>Veritabanı İçe Aktar (Restore)</h2>
+        <div
+            style="margin-bottom: 20px; padding: 15px; background: #fffaf0; border: 1px solid #feebc8; border-radius: 8px;">
+            <p style="margin-top: 0; color: #744210;">⚠️ <strong>DİKKAT:</strong> Bu işlem mevcut veritabanınıza
+                dışarıdan veri ekler. Çakışan kayıtlar (aynı isimli hakemler) güncellenir, olmayanlar eklenir.</p>
+            <label for="db_file">Eski Veritabanı Dosyası (.db)</label>
+            <input type="file" id="db_file" name="db_file" accept=".db" required>
+            <small style="color: #718096; display: block; margin-top: 5px;">
+                Lokalde kullandığınız <code>referee_tracker.db</code> dosyasını seçiniz.
+            </small>
+        </div>
+
+        <button type="submit" class="button" style="background-color: #ed8936;">📤 Verileri Yükle</button>
+    </form>
+</div>
+{% endblock %}

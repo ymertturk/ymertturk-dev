@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+jinja2
+python-multipart
+httpx
+pytest
+pytest-asyncio
+openpyxl
+twilio
+itsdangerous
+psycopg2-binary
+gunicorn

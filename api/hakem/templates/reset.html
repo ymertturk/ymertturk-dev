@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; text-align: center; padding-top: 50px;">
+    <h1 style="color: #e53e3e;">⚠️ TEHLİKELİ BÖLGE: Tüm Verileri Sıfırla</h1>
+
+    <div class="card" style="border: 2px solid #e53e3e; background-color: #fff5f5;">
+        <p style="font-size: 1.1em;">Bu işlem tüm hakemleri ve davetleri <strong>KALICI OLARAK SİLECEKTİR</strong>.</p>
+        <p>Bu işlem geri alınamaz!</p>
+
+        {% if error %}
+        <p class="error" style="font-weight: bold; font-size: 1.1em;">{{ error }}</p>
+        {% endif %}
+
+        <form action="/admin/reset" method="post" style="margin-top: 20px;">
+            <label>Onaylamak için <strong>HEPSİNİ SİL</strong> yazın:</label>
+            <input type="text" name="confirmation" style="text-align: center; font-size: 1.2em; letter-spacing: 1px;"
+                required autocomplete="off">
+            <button type="submit" class="danger-btn" style="width: 100%; font-size: 1.2em; padding: 15px;">TÜM VERİLERİ
+                SİL</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

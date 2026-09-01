@@ -1,4 +1,10 @@
 {
+  "functions": {
+    "api/hakem.py": {
+      "memory": 1024,
+      "maxDuration": 15
+    }
+  },
   "rewrites": [
     { "source": "/brain", "destination": "/brain/index.html" },
     { "source": "/brain/:path*", "destination": "/brain/index.html" },
@@ -6,8 +12,8 @@
     { "source": "/fba-tracker/:path*", "destination": "/fba-tracker/index.html" },
     { "source": "/tedarik", "destination": "/tedarik/index.html" },
     { "source": "/tedarik/:path*", "destination": "/tedarik/index.html" },
-    { "source": "/hakem-takip", "destination": "/hakem-takip/index.html" },
-    { "source": "/hakem-takip/:path*", "destination": "/hakem-takip/index.html" },
+    { "source": "/hakem-takip", "destination": "/api/hakem.py" },
+    { "source": "/hakem-takip/:path*", "destination": "/api/hakem.py" },
     { "source": "/wa-calculator", "destination": "/wa-calculator/index.html" },
     { "source": "/wa-calculator/:path*", "destination": "/wa-calculator/index.html" },
     { "source": "/:path*", "destination": "/index.html" }

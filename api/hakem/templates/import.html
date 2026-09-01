@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Toplu Hakem Ekleme</h1>
+
+{% if result %}
+<div class="alert">
+    <h3>İşlem Sonucu</h3>
+    <p>✅ Eklenen: <strong>{{ result.added }}</strong></p>
+    <p>⏭️ Atlanan (Zaten Var): <strong>{{ result.skipped }}</strong></p>
+    <p>❌ Hatalı: <strong>{{ result.errors }}</strong></p>
+    {% if result.error_details %}
+    <ul style="margin-top: 10px; color: #c53030;">
+        {% for err in result.error_details %}
+        <li>{{ err }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="container">
+    <div class="card" style="flex: 1;">
+        <h3>Seçenek 1: Metin Yapıştır</h3>
+        <p style="color: #718096; font-size: 0.9em;">Her satıra bir hakem gelecek şekilde yapıştırın.<br>
+            Format: <code>Ad Soyad</code> veya <code>Ad Soyad, Telefon, Bölge</code></p>
+        <form action="/import/paste" method="post">
+            <textarea name="paste_data" rows="10"
+                placeholder="Ahmet Yılmaz&#10;Ayşe Demir, 0555 111 22 33, İstanbul&#10;Mehmet Öz; 0532 999 88 77; Ankara"></textarea>
+            <button type="submit">Yapıştırılanları Ekle</button>
+        </form>
+    </div>
+
+    <div class="card" style="flex: 1;">
+        <h3>Seçenek 2: CSV Yükle</h3>
+        <p style="color: #718096; font-size: 0.9em;">Excel veya CSV dosyası yükleyin.<br>
+            Başlıklar: <code>full_name</code>, <code>phone</code>, <code>region</code> (veya ad, telefon, bölge)</p>
+        <form action="/import/csv" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required style="padding: 10px 0;">
+            <button type="submit">CSV Dosyası Yükle</button>
+        </form>
+    </div>
+
+    <div class="card" style="flex: 1;">
+        <h3>Seçenek 3: Google Drive/Sheets</h3>
+        <p style="color: #718096; font-size: 0.9em;">Herkese açık Google Sheets linkini yapıştırın.<br>
+            Link otomatik olarak CSV formatında çekilecektir.</p>
+        <form action="/import/drive" method="post">
+            <input type="text" name="drive_url" placeholder="https://docs.google.com/spreadsheets/d/..." required
+                style="width: 100%; box-sizing: border-box;">
+            <button type="submit">Drive'dan Çek</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

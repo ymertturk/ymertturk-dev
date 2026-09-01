@@ -1,0 +1,3 @@
+([('HakemTakipSistemi',
+   '/Users/ymertturk/Desktop/Hakem/referee_tracker/dist/HakemTakipSistemi',
+   'EXECUTABLE')],)
