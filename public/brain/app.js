@@ -286,6 +286,67 @@ class MindNexusApp {
         });
     }
 
+    openMarkdownModal() {
+        this.closeModals();
+        document.getElementById('markdown-modal').style.display = 'flex';
+        document.getElementById('markdown-paste-area').value = '';
+    }
+
+    handleMarkdownFileSelect(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            document.getElementById('markdown-paste-area').value = event.target.result;
+            this.showToast(`📄 ${file.name} okundu!`);
+        };
+        reader.readAsText(file);
+    }
+
+    processMarkdownImport() {
+        const rawText = document.getElementById('markdown-paste-area').value.trim();
+        if (!rawText) return this.showToast('Lütfen Markdown metni yazın veya dosya seçin', 'warning');
+
+        // Extract title from first line or # Heading
+        const lines = rawText.split('\n');
+        let title = '📝 Markdown Notu';
+        for (let l of lines) {
+            const trimmed = l.trim();
+            if (trimmed.startsWith('#')) {
+                title = trimmed.replace(/^#+\s*/, '');
+                break;
+            } else if (trimmed.length > 3) {
+                title = trimmed.slice(0, 40);
+                break;
+            }
+        }
+
+        // Extract tags matching #tag
+        const tagMatches = rawText.match(/#([\w\u00C0-\u024F\u0400-\u04FFğüşıöçĞÜŞİÖÇ-]+)/g) || [];
+        const tags = Array.from(new Set(tagMatches.map(t => t.replace('#', '').toLowerCase()))).concat(['markdown', 'not']);
+
+        const today = new Date().toISOString().split('T')[0];
+
+        const newNode = {
+            id: `node-md-${Date.now()}`,
+            title: title.length > 50 ? title.substring(0, 47) + '...' : title,
+            content: rawText,
+            source: 'phone',
+            tags: tags,
+            date: today,
+            status: 'active',
+            isMarkdown: true,
+            color: '#3b82f6'
+        };
+
+        this.nodes.push(newNode);
+        this.runSemanticAutoLinking();
+        this.saveData();
+        this.graph.setData(this.nodes, this.links);
+        this.closeModals();
+        this.showToast('🚀 Markdown notu yüklendi & haritaya bağlandı!');
+    }
+
     switchViewMode(mode) {
         this.currentViewMode = mode;
         const containerGraph = document.getElementById('view-container-graph');
@@ -776,9 +837,15 @@ class MindNexusApp {
             toggleBtn.innerText = '⌛ Süresi Doldu Olarak İşaretle';
         }
 
-        document.getElementById('drawer-date').innerText = node.date || 'Belirtilmedi';
-        document.getElementById('drawer-title').innerText = node.title;
-        document.getElementById('drawer-content').innerText = node.content;
+        if (window.marked && (node.isMarkdown || node.content.includes('#') || node.content.includes('*') || node.content.includes('- ') || node.content.includes('```'))) {
+            try {
+                document.getElementById('drawer-content').innerHTML = window.marked.parse(node.content);
+            } catch(e) {
+                document.getElementById('drawer-content').innerText = node.content;
+            }
+        } else {
+            document.getElementById('drawer-content').innerText = node.content;
+        }
 
         const agentBanner = document.getElementById('agent-task-banner');
         const agentStatusText = document.getElementById('agent-task-status-text');
