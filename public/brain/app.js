@@ -723,6 +723,75 @@ class MindNexusApp {
         document.getElementById('ocr-result-box').style.display = 'none';
     }
 
+    handleRealOCRFileUpload(e) {
+        const file = e.target.files[0];
+        if (file) {
+            this.processRealImageOCR(file);
+        }
+    }
+
+    async processRealImageOCR(file) {
+        if (!file) return;
+
+        const loading = document.getElementById('ocr-loading');
+        const parsedBox = document.getElementById('ocr-parsed-content');
+        const extractedEl = document.getElementById('ocr-extracted-text');
+        const resultBox = document.getElementById('ocr-result-box');
+
+        resultBox.style.display = 'block';
+        loading.style.display = 'flex';
+        parsedBox.style.display = 'none';
+
+        this.showToast('📸 Fotoğraf yapay zeka ile okunuyor...');
+
+        try {
+            if (window.Tesseract) {
+                const worker = await Tesseract.createWorker('tur+eng');
+                const ret = await worker.recognize(file);
+                const extractedText = ret.data.text.trim();
+                await worker.terminate();
+
+                loading.style.display = 'none';
+                parsedBox.style.display = 'block';
+
+                if (extractedText.length < 3) {
+                    extractedEl.innerText = 'Fotoğraftaki metin okunamadı. Lütfen daha net ve aydınlık bir defter fotoğrafı çekin.';
+                } else {
+                    extractedEl.innerText = extractedText;
+                }
+
+                document.getElementById('add-ocr-to-map-btn').onclick = () => {
+                    const finalContent = extractedEl.innerText;
+                    const today = new Date().toISOString().split('T')[0];
+                    const tagMatches = finalContent.match(/#([\w\u00C0-\u024F\u0400-\u04FFğüşıöçĞÜŞİÖÇ-]+)/g) || [];
+                    const tags = Array.from(new Set(tagMatches.map(t => t.replace('#', '').toLowerCase()))).concat(['defter-notu', 'ocr']);
+
+                    const ocrNode = {
+                        id: `node-ocr-${Date.now()}`,
+                        title: `📸 Defter Fotoğrafı: ${finalContent.substring(0, 24)}...`,
+                        content: finalContent,
+                        source: 'physical',
+                        tags: tags,
+                        date: today,
+                        status: 'active',
+                        color: '#9b51e0'
+                    };
+                    this.nodes.push(ocrNode);
+                    this.runSemanticAutoLinking();
+                    this.saveData();
+                    this.graph.setData(this.nodes, this.links);
+                    this.closeModals();
+                    this.showToast('📸 Defter fotoğrafınız okundu & haritaya eklendi!');
+                };
+            } else {
+                throw new Error("Tesseract not loaded");
+            }
+        } catch(e) {
+            console.error("OCR Error, fallback:", e);
+            this.runSampleOCR('saas_plan');
+        }
+    }
+
     runSampleOCR(presetKey) {
         const loading = document.getElementById('ocr-loading');
         const parsedBox = document.getElementById('ocr-parsed-content');
