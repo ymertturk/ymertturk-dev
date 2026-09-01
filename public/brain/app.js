@@ -840,26 +840,38 @@ class MindNexusApp {
 
     initRemoteInboxPolling() {
         setInterval(() => {
-            fetch('/api/inbox')
+            fetch('/api/sync?appId=mindnexus_shortcut_inbox')
                 .then(res => res.json())
-                .then(inboxItems => {
-                    const rCount = document.getElementById('remote-count');
-                    if (rCount) rCount.innerText = inboxItems.length;
+                .then(data => {
+                    if (data && Array.isArray(data.items) && data.items.length > 0) {
+                        const today = new Date().toISOString().split('T')[0];
+                        data.items.forEach(item => {
+                            const content = item.content || item.text || '';
+                            const title = item.title || (content.length > 32 ? content.substring(0, 32) + '...' : '📱 Apple Notu');
+                            const tagMatches = content.match(/#([\w\u00C0-\u024F\u0400-\u04FFğüşıöçĞÜŞİÖÇ-]+)/g) || [];
+                            const tags = Array.from(new Set(tagMatches.map(t => t.replace('#', '').toLowerCase()))).concat(['apple-notlar']);
 
-                    if (inboxItems.length > 0) {
-                        inboxItems.forEach(item => {
-                            if (!this.nodes.some(n => n.id === item.id)) {
-                                this.nodes.push(item);
-                                this.autoSuggestLinks(item);
-                                this.showToast(`📡 Uzaktan Not Alındı: "${item.title}"`);
-                            }
+                            const newNode = {
+                                id: `node-shortcut-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+                                title: title,
+                                content: content,
+                                source: 'phone',
+                                tags: tags,
+                                date: today,
+                                status: 'active',
+                                color: '#00F2FE'
+                            };
+
+                            this.nodes.push(newNode);
+                            this.showToast(`🍎 Apple Kestirmesinden Not Alındı: "${newNode.title}"`);
                         });
+
+                        this.runSemanticAutoLinking();
                         this.saveData();
                         this.graph.setData(this.nodes, this.links);
-                        fetch('/api/inbox/clear', { method: 'POST' });
                     }
                 }).catch(e => {});
-        }, 5000);
+        }, 4000);
     }
 
     updateCounts() {

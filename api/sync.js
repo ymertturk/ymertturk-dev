@@ -56,6 +56,15 @@ export default function handler(req, res) {
       } catch (e) {}
     }
 
+    if (payload && payload.shortcutNote) {
+      if (!Array.isArray(memoryStore['mindnexus_shortcut_inbox'])) {
+        memoryStore['mindnexus_shortcut_inbox'] = [];
+      }
+      memoryStore['mindnexus_shortcut_inbox'].push(payload.shortcutNote);
+      saveMemoryStore(memoryStore);
+      return res.status(200).json({ success: true, message: 'Note added to MindNexus Inbox via Apple Shortcut!' });
+    }
+
     if (payload && payload.clear) {
       delete memoryStore[appId];
       saveMemoryStore(memoryStore);
@@ -74,6 +83,13 @@ export default function handler(req, res) {
   }
 
   if (method === 'GET') {
+    if (appId === 'mindnexus_shortcut_inbox') {
+      const items = memoryStore['mindnexus_shortcut_inbox'] || [];
+      memoryStore['mindnexus_shortcut_inbox'] = [];
+      saveMemoryStore(memoryStore);
+      return res.status(200).json({ items });
+    }
+
     const record = memoryStore[appId] || null;
     return res.status(200).json({
       appId,
