@@ -22,7 +22,7 @@ window.UniversalCloudSync = {
 
     async fetchCloudState(isSilent = false) {
         try {
-            const res = await fetch(`/.netlify/functions/sync?appId=${this.appId}`);
+            const res = await fetch(`/api/sync?appId=${this.appId}`);
             if (res.ok) {
                 const payload = await res.json();
                 if (payload && payload.data && payload.updatedAt !== this.lastSyncTime) {
@@ -48,7 +48,7 @@ window.UniversalCloudSync = {
         } catch(e) {}
 
         try {
-            const res = await fetch(`/.netlify/functions/sync?appId=${this.appId}`, {
+            const res = await fetch(`/api/sync?appId=${this.appId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ appId: this.appId, data: stateData })
